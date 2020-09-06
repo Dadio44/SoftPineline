@@ -40,6 +40,7 @@ RasterOutput GetInterpolationValue(
 void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput& v1, const RasterOutput& v2, const RasterOutput& v3);
 RasterOutput GetRasterOutput(const VertexOutPut& vertex);
 void PixelShader(const std::vector<RasterOutput>& rasterOutput,BMP::BMP& rt);
+void ClearColor(BMP::BMP& rt);
 
 int main()
 {
@@ -66,6 +67,7 @@ int main()
 	BMP::BMP rt;
 
 	rt.SetOutPut("renderTarget.bmp", width, height);
+	ClearColor(rt);
 
 	PixelShader(rasterOut,rt);
 
@@ -321,4 +323,16 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt)
 	{
 		rt.drawPixelAt(255, 0, 0, pixelInput.screenPos.x, pixelInput.screenPos.y);
 	}
+}
+
+void ClearColor(BMP::BMP& rt)
+{
+	for (int i = 0; i < width; i++)
+	{
+		for (int j = 0; j < height; j++)
+		{
+			rt.drawPixelAt(255, 255, 255, i, j);
+		}
+	}
+
 }
