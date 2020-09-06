@@ -15,7 +15,6 @@ int width = 1920;
 int height = 1080;
 
 
-
 void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
 void VertexShader(const std::vector<VertexInput>& vsInput,std::vector<VertexOutPut>& vsOutput);
 void Rasterize(const std::vector<VertexOutPut>& vsOutput,std::vector<RasterOutput>& rasterOutput);
@@ -25,9 +24,23 @@ RasterPixel GetRasterPixel(const RasterOutput & rasterOutput);
 void FillTriangleByDrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & v1, const RasterPixel & v2, const RasterPixel & v3);
 void FillButtomTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3);
 void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & v1, const RasterPixel & v2, const RasterPixel & v3);
-void Interpolation(std::vector<RasterOutput>& rasterOutput, const std::vector<RasterPixel>& rasterPixels);
+void Interpolation(
+	std::vector<RasterOutput>& rasterOutput, 
+	const RasterOutput& v1,
+	const RasterOutput& v2,
+	const RasterOutput& v3,
+	const std::vector<RasterPixel>& rasterPixels);
+
+RasterOutput GetInterpolationValue(
+	const RasterOutput& v1,
+	const RasterOutput& v2,
+	const RasterOutput& v3,
+	const RasterPixel& pixel);
+
 void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput& v1, const RasterOutput& v2, const RasterOutput& v3);
 RasterOutput GetRasterOutput(const VertexOutPut& vertex);
+void PixelShader(const std::vector<RasterOutput>& rasterOutput);
+
 
 int main()
 {
@@ -49,6 +62,8 @@ int main()
 
 	std::vector<RasterOutput> rasterOut;
 	Rasterize(vsOutput, rasterOut);
+
+	PixelShader(rasterOut);
 
 	BMP::BMP rt;
 	rt.SetOutPut("renderTarget.bmp", width, height);
@@ -229,9 +244,26 @@ void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel &
 
 }
 
-void Interpolation(std::vector<RasterOutput>& rasterOutput,const std::vector<RasterPixel>& rasterPixels)
+void Interpolation(
+	std::vector<RasterOutput>& rasterOutput,
+	const RasterOutput& v1,
+	const RasterOutput& v2,
+	const RasterOutput& v3,
+	const std::vector<RasterPixel>& rasterPixels)
 {
+	for (auto pixel : rasterPixels)
+	{
+		rasterOutput.push_back(GetInterpolationValue(v1, v2, v3, pixel));
+	}
+}
 
+RasterOutput GetInterpolationValue(const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3, const RasterPixel & pixel)
+{
+	RasterOutput res;
+
+	res.screenPos = pixel.screenPos;
+
+	return res;
 }
 
 void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3)
@@ -248,14 +280,14 @@ void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 	if (v1.screenPos.y == v2.screenPos.y)
 	{
 		FillTopTriangle(rasterPixels, p3, p1, p2);		
-		Interpolation(rasterOutput,rasterPixels);
+		Interpolation(rasterOutput, v1, v2, v3,rasterPixels);
 		return;
 	}
 
 	if (v2.screenPos.y == v3.screenPos.y)
 	{
 		FillButtomTriangle(rasterPixels, p1, p2, p3);
-		Interpolation(rasterOutput, rasterPixels);
+		Interpolation(rasterOutput, v1, v2, v3, rasterPixels);
 		return;
 	}
 
@@ -269,7 +301,7 @@ void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 	FillButtomTriangle(rasterPixels, p1, p2, p4);
 	FillTopTriangle(rasterPixels, p2, p4, p3);
 
-	Interpolation(rasterOutput, rasterPixels);
+	Interpolation(rasterOutput, v1, v2, v3, rasterPixels);
 }
 
 RasterOutput GetRasterOutput(const VertexOutPut & vertex)
@@ -285,4 +317,8 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
 	rasterOutput.screenPos.y = (vertex.sv_position.y * 0.5f + 0.5f) * height;
 
 	return rasterOutput;
+}
+
+void PixelShader(const std::vector<RasterOutput>& rasterOutput)
+{
 }
