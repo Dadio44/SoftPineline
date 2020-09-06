@@ -20,6 +20,12 @@ void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
 void VertexShader(const std::vector<VertexInput>& vsInput,std::vector<VertexOutPut>& vsOutput);
 void Rasterize(const std::vector<VertexOutPut>& vsOutput,std::vector<RasterOutput>& rasterOutput);
 void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput& v1, const RasterOutput& v2, const RasterOutput& v3);
+void DrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & rL, const RasterPixel & rR);
+RasterPixel GetRasterPixel(const RasterOutput & rasterOutput);
+void FillTriangleByDrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & v1, const RasterPixel & v2, const RasterPixel & v3);
+void FillButtomTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3);
+void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & v1, const RasterPixel & v2, const RasterPixel & v3);
+void Interpolation(std::vector<RasterOutput>& rasterOutput, const std::vector<RasterPixel>& rasterPixels);
 void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput& v1, const RasterOutput& v2, const RasterOutput& v3);
 RasterOutput GetRasterOutput(const VertexOutPut& vertex);
 
