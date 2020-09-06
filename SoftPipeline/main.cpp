@@ -3,11 +3,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "BMP.h"
-#include "Mesh.h"
-#include "test.h"
-#include "VertexInput.h"
-#include "VertexOutPut.h"
+#include <BMP.h>
+#include <Mesh.h>
+#include <test.h>
+#include <VertexInput.h>
+#include <VertexOutPut.h>
+#include <RasterOutput.h>
+#include <RasterPixel.h>
 
 int width = 1920;
 int height = 1080;
@@ -16,6 +18,10 @@ int height = 1080;
 
 void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
 void VertexShader(const std::vector<VertexInput>& vsInput,std::vector<VertexOutPut>& vsOutput);
+void Rasterize(const std::vector<VertexOutPut>& vsOutput,std::vector<RasterOutput>& rasterOutput);
+void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput& v1, const RasterOutput& v2, const RasterOutput& v3);
+void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput& v1, const RasterOutput& v2, const RasterOutput& v3);
+RasterOutput GetRasterOutput(const VertexOutPut& vertex);
 
 int main()
 {
@@ -32,7 +38,12 @@ int main()
 
 	std::vector<VertexOutPut> vsOutput(vsInput.size());
 	VertexShader(vsInput,vsOutput);
-	
+
+	// TODO :clip
+
+	std::vector<RasterOutput> rasterOut;
+	Rasterize(vsOutput, rasterOut);
+
 	BMP::BMP rt;
 	rt.SetOutPut("renderTarget.bmp", width, height);
 
@@ -86,8 +97,186 @@ void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOut
 	for (int i = 0;i < cnt;i++)
 	{
 		vsOutput[i].position = model * vsInput[i].position;
-		vsOutput[i].normal = model * vsInput[i].position;
+		vsOutput[i].normal = model * vsInput[i].normal;
 		vsOutput[i].sv_position = vp * vsOutput[i].position;
 		vsOutput[i].uv = vsOutput[i].uv;
 	}
+}
+
+void Rasterize(const std::vector<VertexOutPut>& vsOutput, std::vector<RasterOutput>& rasterOutput)
+{
+	int size = vsOutput.size();
+
+	for (int i = 0; i < size; i += 3)
+	{
+		DrawTriangle(rasterOutput, 
+			GetRasterOutput(vsOutput[i]),
+			GetRasterOutput(vsOutput[i + 1]),
+			GetRasterOutput(vsOutput[i + 2]));
+	}
+
+}
+
+void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3)
+{
+	if (v1.screenPos.y > v2.screenPos.y && v1.screenPos.y > v3.screenPos.y)
+	{
+		if (v2.screenPos.y > v3.screenPos.y)
+		{
+			FillTriangle(rasterOutput, v1, v2, v3);
+		}
+		else
+		{
+			FillTriangle(rasterOutput, v1, v3, v2);
+		}
+	}
+
+	if (v2.screenPos.y > v1.screenPos.y && v2.screenPos.y > v3.screenPos.y)
+	{
+		if (v1.screenPos.y > v3.screenPos.y)
+		{
+			FillTriangle(rasterOutput, v2, v1, v3);
+		}
+		else
+		{
+			FillTriangle(rasterOutput, v2, v3, v1);
+		}
+	}
+
+	if (v3.screenPos.y > v1.screenPos.y && v3.screenPos.y > v2.screenPos.y)
+	{
+		if (v1.screenPos.y > v2.screenPos.y)
+		{
+			FillTriangle(rasterOutput, v3, v1, v2);
+		}
+		else
+		{
+			FillTriangle(rasterOutput, v3, v2, v1);
+		}
+	}
+	
+
+}
+
+void DrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & rL, const RasterPixel & rR)
+{
+	for (int i = rL.screenPos.x; i < rR.screenPos.x; i++)
+	{
+		rasterOutput.push_back(RasterPixel(glm::ivec2(i,rL.screenPos.y)));
+	}
+}
+
+RasterPixel GetRasterPixel(const RasterOutput& rasterOutput)
+{
+	RasterPixel res; 
+	res.screenPos = rasterOutput.screenPos;
+	return res;
+}
+
+void FillTriangleByDrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & v1, const RasterPixel & v2, const RasterPixel & v3)
+{
+
+}
+
+void FillButtomTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3)
+{
+	int dy = p1.screenPos.y - p2.screenPos.y;
+
+	int dx = p2.screenPos.x - p3.screenPos.x;
+
+	const RasterPixel* pL;
+	const RasterPixel* pR;
+
+	if (dx < 0)
+	{
+		pL = &p2;
+		pR = &p3;
+	}
+	else
+	{
+		pL = &p3;
+		pR = &p2;
+	}
+
+
+
+	float kL = (p1.screenPos.x - pL->screenPos.x) / glm::max(1,p1.screenPos.y - pL->screenPos.y);
+	float kR = (p1.screenPos.x - pR->screenPos.x) / glm::max(1,p1.screenPos.y - pR->screenPos.y);
+
+	RasterPixel tL;
+	RasterPixel tR;
+
+
+	for (int i = 0; i < dy; i++)
+	{
+		tL.screenPos.y = tR.screenPos.y = p1.screenPos.y - i;
+		tL.screenPos.x = p1.screenPos.x + kL * -i;
+		tR.screenPos.x = p1.screenPos.x + kR * -i;
+
+		DrawLine(rasterOutput, tL, tR);
+	}
+
+}
+
+void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & v1, const RasterPixel & v2, const RasterPixel & v3)
+{
+
+}
+
+void Interpolation(std::vector<RasterOutput>& rasterOutput,const std::vector<RasterPixel>& rasterPixels)
+{
+
+}
+
+void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3)
+{
+	assert(v1.screenPos.y >= v2.screenPos.y &&
+		v2.screenPos.y >= v3.screenPos.y);
+
+	std::vector<RasterPixel> rasterPixels;
+
+	RasterPixel p1 = GetRasterPixel(v1);
+	RasterPixel p2 = GetRasterPixel(v2);
+	RasterPixel p3 = GetRasterPixel(v3);
+
+	if (v1.screenPos.y == v2.screenPos.y)
+	{
+		FillTopTriangle(rasterPixels, p3, p1, p2);		
+		Interpolation(rasterOutput,rasterPixels);
+		return;
+	}
+
+	if (v2.screenPos.y == v3.screenPos.y)
+	{
+		FillButtomTriangle(rasterPixels, p1, p2, p3);
+		Interpolation(rasterOutput, rasterPixels);
+		return;
+	}
+
+	RasterPixel p4;
+
+	float k = (v1.screenPos.x - v3.screenPos.x) / (v1.screenPos.y - v3.screenPos.y);
+
+	p4.screenPos.x = v1.screenPos.x + (v2.screenPos.y - v1.screenPos.y) * k;
+	p4.screenPos.y = v1.screenPos.y;
+
+	FillButtomTriangle(rasterPixels, p1, p2, p4);
+	FillTopTriangle(rasterPixels, p2, p4, p3);
+
+	Interpolation(rasterOutput, rasterPixels);
+}
+
+RasterOutput GetRasterOutput(const VertexOutPut & vertex)
+{
+	RasterOutput rasterOutput;
+
+	rasterOutput.sv_position = vertex.sv_position / -vertex.sv_position.w;
+	rasterOutput.sv_position.w = 1;
+	rasterOutput.normal = vertex.normal;
+	rasterOutput.position = vertex.position;
+	rasterOutput.uv = vertex.uv;
+	rasterOutput.screenPos.x = (vertex.sv_position.x * 0.5f + 0.5f) * width;
+	rasterOutput.screenPos.y = (vertex.sv_position.y * 0.5f + 0.5f) * height;
+
+	return rasterOutput;
 }
