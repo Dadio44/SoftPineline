@@ -1,5 +1,5 @@
-#include <iostream>
 #include <vector>
+#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -73,7 +73,7 @@ int main()
 
 	rt.writeImage();
 	
-	system("pause");
+	//system("pause");
 
 	return 0;
 }
@@ -104,10 +104,12 @@ void GetVsInputs(const Mesh & mesh, std::vector<VertexInput>& vsInput)
 void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOutPut>& vsOutput)
 {
 	glm::mat4x4 model = glm::mat4x4(1);
-	glm::translate(model, glm::vec3(0));
+	model = glm::translate(model, glm::vec3(0));
+	model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
+	model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
 
 	glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, 5), glm::vec3(0), glm::vec3(0, 1, 0));
-	glm::mat4x4 projection = glm::perspective(60.0f,(float)width / height,0.3f,100.0f);
+	glm::mat4x4 projection = glm::perspective(glm::radians(60.0f),(float)width / height,0.3f,10.0f);
 
 	glm::mat4x4 vp = projection * view;
 
@@ -138,48 +140,54 @@ void Rasterize(const std::vector<VertexOutPut>& vsOutput, std::vector<RasterOutp
 
 void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3)
 {
-	if (v1.screenPos.y > v2.screenPos.y && v1.screenPos.y > v3.screenPos.y)
+	if (v1.screenPos.y >= v2.screenPos.y && v1.screenPos.y >= v3.screenPos.y)
 	{
 		if (v2.screenPos.y > v3.screenPos.y)
 		{
 			FillTriangle(rasterOutput, v1, v2, v3);
+			return;
 		}
 		else
 		{
 			FillTriangle(rasterOutput, v1, v3, v2);
+			return;
 		}
 	}
 
-	if (v2.screenPos.y > v1.screenPos.y && v2.screenPos.y > v3.screenPos.y)
+	if (v2.screenPos.y >= v1.screenPos.y && v2.screenPos.y >= v3.screenPos.y)
 	{
 		if (v1.screenPos.y > v3.screenPos.y)
 		{
 			FillTriangle(rasterOutput, v2, v1, v3);
+			return;
 		}
 		else
 		{
 			FillTriangle(rasterOutput, v2, v3, v1);
+			return;
 		}
 	}
 
-	if (v3.screenPos.y > v1.screenPos.y && v3.screenPos.y > v2.screenPos.y)
+	if (v3.screenPos.y >= v1.screenPos.y && v3.screenPos.y >= v2.screenPos.y)
 	{
 		if (v1.screenPos.y > v2.screenPos.y)
 		{
 			FillTriangle(rasterOutput, v3, v1, v2);
+			return;
 		}
 		else
 		{
 			FillTriangle(rasterOutput, v3, v2, v1);
+			return;
 		}
 	}
 	
-
+	assert(false);
 }
 
 void DrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & rL, const RasterPixel & rR)
 {
-	for (int i = rL.screenPos.x; i < rR.screenPos.x; i++)
+	for (int i = rL.screenPos.x; i <= rR.screenPos.x; i++)
 	{
 		rasterOutput.push_back(RasterPixel(glm::ivec2(i,rL.screenPos.y)));
 	}
@@ -199,7 +207,7 @@ void FillTriangleByDrawLine(std::vector<RasterPixel>& rasterOutput, const Raster
 
 void FillButtomTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3)
 {
-	int dy = p1.screenPos.y - p2.screenPos.y;
+	int dy = p1.screenPos.y - p3.screenPos.y;
 
 	int dx = p2.screenPos.x - p3.screenPos.x;
 
@@ -219,14 +227,14 @@ void FillButtomTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixe
 
 
 
-	float kL = (p1.screenPos.x - pL->screenPos.x) / glm::max(1,p1.screenPos.y - pL->screenPos.y);
-	float kR = (p1.screenPos.x - pR->screenPos.x) / glm::max(1,p1.screenPos.y - pR->screenPos.y);
+	float kL = ((float)(p1.screenPos.x - pL->screenPos.x)) / glm::max(1,p1.screenPos.y - pL->screenPos.y);
+	float kR = ((float)(p1.screenPos.x - pR->screenPos.x)) / glm::max(1,p1.screenPos.y - pR->screenPos.y);
 
 	RasterPixel tL;
 	RasterPixel tR;
 
 
-	for (int i = 0; i < dy; i++)
+	for (int i = 0; i <= dy; i++)
 	{
 		tL.screenPos.y = tR.screenPos.y = p1.screenPos.y - i;
 		tL.screenPos.x = p1.screenPos.x + kL * -i;
@@ -237,9 +245,43 @@ void FillButtomTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixe
 
 }
 
-void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & v1, const RasterPixel & v2, const RasterPixel & v3)
+void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3)
 {
+	int dy = p3.screenPos.y - p1.screenPos.y;
 
+	int dx = p2.screenPos.x - p3.screenPos.x;
+
+	const RasterPixel* pL;
+	const RasterPixel* pR;
+
+	if (dx < 0)
+	{
+		pL = &p2;
+		pR = &p3;
+	}
+	else
+	{
+		pL = &p3;
+		pR = &p2;
+	}
+
+
+
+	float kL = ((float)(pL->screenPos.x - p1.screenPos.x)) / glm::max(1, pL->screenPos.y - p1.screenPos.y);
+	float kR = ((float)(pR->screenPos.x - p1.screenPos.x)) / glm::max(1, pR->screenPos.y - p1.screenPos.y);
+
+	RasterPixel tL;
+	RasterPixel tR;
+
+
+	for (int i = 0; i <= dy; i++)
+	{ 
+		tL.screenPos.y = tR.screenPos.y = p1.screenPos.y + i;
+		tL.screenPos.x = p1.screenPos.x + kL * i;
+		tR.screenPos.x = p1.screenPos.x + kR * i;
+
+		DrawLine(rasterOutput, tL, tR);
+	}
 }
 
 void Interpolation(
@@ -291,13 +333,13 @@ void FillTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 
 	RasterPixel p4;
 
-	float k = (v1.screenPos.x - v3.screenPos.x) / (v1.screenPos.y - v3.screenPos.y);
+	float k = ((float)(v3.screenPos.x - v1.screenPos.x)) / (v3.screenPos.y - v1.screenPos.y);
 
 	p4.screenPos.x = v1.screenPos.x + (v2.screenPos.y - v1.screenPos.y) * k;
-	p4.screenPos.y = v1.screenPos.y;
+	p4.screenPos.y = v2.screenPos.y;
 
 	FillButtomTriangle(rasterPixels, p1, p2, p4);
-	FillTopTriangle(rasterPixels, p2, p4, p3);
+	FillTopTriangle(rasterPixels, p3, p2, p4);
 
 	Interpolation(rasterOutput, v1, v2, v3, rasterPixels);
 }
@@ -306,22 +348,29 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
 {
 	RasterOutput rasterOutput;
 
-	rasterOutput.sv_position = vertex.sv_position / -vertex.sv_position.w;
-	rasterOutput.sv_position.w = 1;
+	rasterOutput.sv_position = vertex.sv_position / vertex.sv_position.w;
 	rasterOutput.normal = vertex.normal;
 	rasterOutput.position = vertex.position;
 	rasterOutput.uv = vertex.uv;
-	rasterOutput.screenPos.x = (vertex.sv_position.x * 0.5f + 0.5f) * width;
-	rasterOutput.screenPos.y = (vertex.sv_position.y * 0.5f + 0.5f) * height;
+	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5f + 0.5f) * width;
+	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5f + 0.5f) * height;
 
-	return rasterOutput;
+ 	return rasterOutput;
 }
 
 void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt)
 {
 	for (auto pixelInput : rasterOutput)
 	{
-		rt.drawPixelAt(255, 0, 0, pixelInput.screenPos.x, pixelInput.screenPos.y);
+		if (
+			pixelInput.screenPos.x < width && 
+			pixelInput.screenPos.y < height &&
+			pixelInput.screenPos.x >= 0 &&
+			pixelInput.screenPos.y >= 0
+			)
+		{
+			rt.drawPixelAt(255, 0, 0, pixelInput.screenPos.x, pixelInput.screenPos.y);
+		}
 	}
 }
 
