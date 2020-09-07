@@ -187,6 +187,7 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 
 void DrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & rL, const RasterPixel & rR)
 {
+	assert(rL.screenPos.x <= rR.screenPos.x);
 	for (int i = rL.screenPos.x; i <= rR.screenPos.x; i++)
 	{
 		rasterOutput.push_back(RasterPixel(glm::ivec2(i,rL.screenPos.y)));
