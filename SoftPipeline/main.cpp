@@ -47,7 +47,7 @@ int main()
 
 	Mesh mesh;
 
-	mesh.LoadFromFile("Cube.obj");
+	mesh.LoadFromFile("Sphere.obj");
 
 	//PrintMesh(mesh);
 
@@ -201,52 +201,7 @@ RasterPixel GetRasterPixel(const RasterOutput& rasterOutput)
 	return res;
 }
 
-void FillTriangleByDrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & v1, const RasterPixel & v2, const RasterPixel & v3)
-{
-
-}
-
-void FillButtomTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3)
-{
-	int dy = p1.screenPos.y - p3.screenPos.y;
-
-	int dx = p2.screenPos.x - p3.screenPos.x;
-
-	const RasterPixel* pL;
-	const RasterPixel* pR;
-
-	if (dx < 0)
-	{
-		pL = &p2;
-		pR = &p3;
-	}
-	else
-	{
-		pL = &p3;
-		pR = &p2;
-	}
-
-
-
-	float kL = ((float)(p1.screenPos.x - pL->screenPos.x)) / glm::max(1,p1.screenPos.y - pL->screenPos.y);
-	float kR = ((float)(p1.screenPos.x - pR->screenPos.x)) / glm::max(1,p1.screenPos.y - pR->screenPos.y);
-
-	RasterPixel tL;
-	RasterPixel tR;
-
-
-	for (int i = 0; i <= dy; i++)
-	{
-		tL.screenPos.y = tR.screenPos.y = p1.screenPos.y - i;
-		tL.screenPos.x = p1.screenPos.x + kL * -i;
-		tR.screenPos.x = p1.screenPos.x + kR * -i;
-
-		DrawLine(rasterOutput, tL, tR);
-	}
-
-}
-
-void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3)
+void FillTriangleByDrawLine(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3)
 {
 	int dy = p3.screenPos.y - p1.screenPos.y;
 
@@ -267,22 +222,46 @@ void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel &
 	}
 
 
+	float kL = ((float)(pL->screenPos.x - p1.screenPos.x));
 
-	float kL = ((float)(pL->screenPos.x - p1.screenPos.x)) / glm::max(1, pL->screenPos.y - p1.screenPos.y);
-	float kR = ((float)(pR->screenPos.x - p1.screenPos.x)) / glm::max(1, pR->screenPos.y - p1.screenPos.y);
+	float kR = ((float)(pR->screenPos.x - p1.screenPos.x));
+
+	if (dy != 0)
+	{
+		kL = kL / dy;
+		kR = kR / dy;
+	}
 
 	RasterPixel tL;
 	RasterPixel tR;
 
+	int rate = dy > 0 ? 1 : -1;
+
+	dy = abs(dy);
+
+	int ddx;
+
 
 	for (int i = 0; i <= dy; i++)
-	{ 
-		tL.screenPos.y = tR.screenPos.y = p1.screenPos.y + i;
-		tL.screenPos.x = p1.screenPos.x + kL * i;
-		tR.screenPos.x = p1.screenPos.x + kR * i;
+	{
+		ddx = i * rate;
+
+		tL.screenPos.y = tR.screenPos.y = p1.screenPos.y + ddx;
+		tL.screenPos.x = p1.screenPos.x + kL * ddx;
+		tR.screenPos.x = p1.screenPos.x + kR * ddx;
 
 		DrawLine(rasterOutput, tL, tR);
 	}
+}
+
+void FillButtomTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3)
+{
+	FillTriangleByDrawLine(rasterOutput, p1, p2, p3);
+}
+
+void FillTopTriangle(std::vector<RasterPixel>& rasterOutput, const RasterPixel & p1, const RasterPixel & p2, const RasterPixel & p3)
+{
+	FillTriangleByDrawLine(rasterOutput, p1, p2, p3);
 }
 
 void Interpolation(
