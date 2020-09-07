@@ -21,17 +21,15 @@ void Mesh::LoadFromFile(const char * filaName)
 		free(_buffer);
 	}
 
-	_buffer = static_cast<unsigned char*>(malloc(sizeof(int) * 4));
-
-	auto readCnt = fread(_buffer, sizeof(int), 4, f);
+	int tmp[4];
+	
+	auto readCnt = fread(tmp, sizeof(int), 4, f);
 	assert(readCnt == 4);
 
-	_verticesCount = *reinterpret_cast<int*>(_buffer);
-	_normalsCount = *reinterpret_cast<int*>(_buffer + sizeof(int));
-	_uvsCount = *reinterpret_cast<int*>(_buffer + sizeof(int) * 2);
-	_indicesCount = *reinterpret_cast<int*>(_buffer + sizeof(int) * 3);
-
-	free(_buffer);
+	_verticesCount = *reinterpret_cast<int*>(tmp);
+	_normalsCount = *reinterpret_cast<int*>(tmp + 1);
+	_uvsCount = *reinterpret_cast<int*>(tmp + 2);
+	_indicesCount = *reinterpret_cast<int*>(tmp + 3);
 
 	auto size =
 		_verticesCount * sizeof(float) * 3 +
