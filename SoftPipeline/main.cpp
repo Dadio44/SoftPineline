@@ -24,10 +24,8 @@ void DrawTriangle(
 	const RasterOutput& v2, 
 	const RasterOutput& v3);
 
-float EdgeEquation(const glm::vec3& e1, const glm::vec3& e2);
-
-bool IsBack(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3);
-bool Inside(const glm::vec3& p, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3);
+float EdgeEquation(const glm::vec2& e1, const glm::vec2& e2);
+bool Inside(const glm::vec2& p, const glm::vec2& v1, const glm::vec2& v2, const glm::vec2& v3);
 
 void Interpolation(
 	std::vector<RasterOutput>& rasterOutput, 
@@ -144,34 +142,26 @@ void Rasterize(const std::vector<VertexOutPut>& vsOutput, std::vector<RasterOutp
 
 }
 
-bool IsBack(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3)
-{
-	return glm::cross(v1, v2).z < 0;
-}
-
-float EdgeEquation(const glm::vec3& e1, const glm::vec3& e2)
+float EdgeEquation(const glm::vec2& e1, const glm::vec2& e2)
 {
 	return e1.x * e2.y - e2.x * e1.y;
 }
 
-bool Inside(const glm::vec3& p, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3)
+bool Inside(const glm::vec2& p, const glm::vec2& v1, const glm::vec2& v2, const glm::vec2& v3)
 {
-	glm::vec3 v12 = v2 - v1;
-	glm::vec3 v23 = v3 - v2;
-	glm::vec3 v31 = v1 - v3;
+	glm::vec2 v12 = v2 - v1;
+	glm::vec2 v23 = v3 - v2;
+	glm::vec2 v31 = v1 - v3;
 
-	glm::vec3 v1p = p - v1;
-	glm::vec3 v2p = p - v2;
-	glm::vec3 v3p = p - v3;
+	glm::vec2 v1p = p - v1;
+	glm::vec2 v2p = p - v2;
+	glm::vec2 v3p = p - v3;
 
 	float c1 = EdgeEquation(v12, v1p);
 	float c2 = EdgeEquation(v23, v2p);
 	float c3 = EdgeEquation(v31, v3p);
 
-	if (IsBack(v12, v23, v31))
-		return (c1 < 0 && c2 < 0 && c3 < 0);
-	else
-		return (c1 >= 0 && c2 >= 0 && c3 >= 0);
+	return (c1 < 0 && c2 < 0 && c3 < 0)	|| (c1 > 0 && c2 > 0 && c3 > 0);
 }
 
 void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3)
@@ -203,10 +193,10 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 	{
 		for (int y = minY; y <= maxY; y++)
 		{
-			if (Inside(glm::vec3(x,y,0), 
-				glm::vec3(v1.FscreenPos,0),
-				glm::vec3(v2.FscreenPos,0), 
-				glm::vec3(v3.FscreenPos,0)))
+			if (Inside(glm::vec2(x,y), 
+				glm::vec2(v1.FscreenPos),
+				glm::vec2(v2.FscreenPos), 
+				glm::vec2(v3.FscreenPos)))
 			{
 				Interpolation(rasterOutput, v1, v2, v3,x,y);
 			}
