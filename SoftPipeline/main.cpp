@@ -24,9 +24,6 @@ void DrawTriangle(
 	const RasterOutput& v2, 
 	const RasterOutput& v3);
 
-float EdgeEquation(const glm::vec2& e1, const glm::vec2& e2);
-bool Inside(const glm::vec2& p, const glm::vec2& v1, const glm::vec2& v2, const glm::vec2& v3);
-
 void Interpolation(
 	std::vector<RasterOutput>& rasterOutput, 
 	const RasterOutput& v1,
@@ -140,28 +137,6 @@ void Rasterize(const std::vector<VertexOutPut>& vsOutput, std::vector<RasterOutp
 			GetRasterOutput(vsOutput[i + 2]));
 	}
 
-}
-
-float EdgeEquation(const glm::vec2& e1, const glm::vec2& e2)
-{
-	return e1.x * e2.y - e2.x * e1.y;
-}
-
-bool Inside(const glm::vec2& p, const glm::vec2& v1, const glm::vec2& v2, const glm::vec2& v3)
-{
-	glm::vec2 v12 = v2 - v1;
-	glm::vec2 v23 = v3 - v2;
-	glm::vec2 v31 = v1 - v3;
-
-	glm::vec2 v1p = p - v1;
-	glm::vec2 v2p = p - v2;
-	glm::vec2 v3p = p - v3;
-
-	float c1 = EdgeEquation(v12, v1p);
-	float c2 = EdgeEquation(v23, v2p);
-	float c3 = EdgeEquation(v31, v3p);
-
-	return (c1 < 0 && c2 < 0 && c3 < 0)	|| (c1 > 0 && c2 > 0 && c3 > 0);
 }
 
 void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3)
