@@ -189,18 +189,54 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 	assert(0 <= minX && minX <= maxX && maxX <= width);
 	assert(0 <= minY && minY <= maxY && maxY <= height);
 
-	for (int x = minX; x <= maxX; x++)
+	const glm::vec2& A = v1.FscreenPos;
+	const glm::vec2& B = v2.FscreenPos;
+	const glm::vec2& C = v3.FscreenPos;
+	glm::vec2 P = glm::vec2(minX,minY);
+
+	float i01 = A.y - B.y;
+	float j01 = B.x - A.x;
+	float k01 = A.x * B.y - A.y * B.x;
+	float f01 = i01 * P.x + j01 * P.y + k01;
+
+	float i02 = B.y - C.y;
+	float j02 = C.x - B.x;
+	float k02 = B.x * C.y - B.y * C.x;
+	float f02 = i02 * P.x + j02 * P.y + k02;
+
+	float i03 = C.y - A.y;
+	float j03 = A.x - C.x;
+	float k03 = C.x * A.y - C.y * A.x;
+	float f03 = i03 * P.x + j03 * P.y + k03;
+
+	float cy1 = f01;
+	float cy2 = f02;
+	float cy3 = f03;
+
+	float cx1;
+	float cx2;
+	float cx3;
+
+	for (int y = minY; y <= maxY; y++)
 	{
-		for (int y = minY; y <= maxY; y++)
+		cx1 = cy1;
+		cx2 = cy2; 
+		cx3 = cy3;
+
+		for (int x = minX; x <= maxX; x++)
 		{
-			if (Inside(glm::vec2(x,y), 
-				glm::vec2(v1.FscreenPos),
-				glm::vec2(v2.FscreenPos), 
-				glm::vec2(v3.FscreenPos)))
+			if ((cx1 > 0 && cx2 > 0 && cx3 > 0) 
+				|| (cx1 < 0 && cx2 < 0 && cx3 < 0))
 			{
 				Interpolation(rasterOutput, v1, v2, v3,x,y);
 			}
+
+			cx1 += i01; cx2 += i02; cx3 += i03;
 		}
+
+		cy1 += j01;
+		cy2 += j02;
+		cy3 += j03;
 	}
 
 }
