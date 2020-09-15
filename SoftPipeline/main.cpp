@@ -275,10 +275,8 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
 	rasterOutput.normal = vertex.normal;
 	rasterOutput.position = vertex.position;
 	rasterOutput.uv = vertex.uv;
-	rasterOutput.FscreenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * width;
-	rasterOutput.FscreenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * height;
-	rasterOutput.screenPos.x = rasterOutput.FscreenPos.x;
-	rasterOutput.screenPos.y = rasterOutput.FscreenPos.y;
+	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * width;
+	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * height;
 
  	return rasterOutput;
 }
@@ -308,7 +306,7 @@ void ClearColor(BMP::BMP& rt)
 	{
 		for (int j = 0; j < height; j++)
 		{
-			rt.drawPixelAt(1.0f, 1.0f, 1.0f, i, j);
+			rt.drawPixelAt(0.0f, 0.0f, 0.0f, i, j);
 		}
 	}
 
