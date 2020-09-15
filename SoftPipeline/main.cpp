@@ -46,15 +46,16 @@ RasterOutput GetInterpolationValue(
 	int y);
 
 RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-void PixelShader(const std::vector<RasterOutput>& rasterOutput,BMP::BMP& rt);
+void PixelShader(const std::vector<RasterOutput>& rasterOutput,BMP::BMP& rt,float * depthBuffer);
 void ClearColor(BMP::BMP& rt);
+void ClearDepth(float value, float * depthBuffer);
 
 int main()
 {
 
 	Mesh mesh;
 
-	mesh.LoadFromFile("Sphere.obj");
+	mesh.LoadFromFile("Cube.obj");
 
 	//PrintMesh(mesh);
 
@@ -70,16 +71,19 @@ int main()
 	std::vector<RasterOutput> rasterOut;
 	Rasterize(vsOutput, rasterOut);
 
-
 	BMP::BMP rt;
+	float* depthBuffer = static_cast<float*>(malloc(sizeof(float) * width * height));
 
 	rt.SetOutPut("renderTarget.bmp", width, height);
 	ClearColor(rt);
+	ClearDepth(1, depthBuffer);
 
-	PixelShader(rasterOut,rt);
+	PixelShader(rasterOut,rt,depthBuffer);
 
 	rt.writeImage();
 	
+	free(depthBuffer);
+
 	//system("pause");
 
 	return 0;
@@ -112,8 +116,8 @@ void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOut
 {
 	glm::mat4x4 model = glm::mat4x4(1);
 	model = glm::translate(model, glm::vec3(0));
-	model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
-	model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
+	/*model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
+	model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));*/
 
 	glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, 5), glm::vec3(0), glm::vec3(0, 1, 0));
 	glm::mat4x4 projection = glm::perspective(glm::radians(60.0f),(float)width / height,0.3f,10.0f);
@@ -281,18 +285,16 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
  	return rasterOutput;
 }
 
-void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt)
+void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt, float * depthBuffer)
 {
+	int depthIndex;
 	for (auto pixelInput : rasterOutput)
 	{
-		if (
-			pixelInput.screenPos.x < width && 
-			pixelInput.screenPos.y < height &&
-			pixelInput.screenPos.x >= 0 &&
-			pixelInput.screenPos.y >= 0
-			)
+		depthIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * height;
+		if (depthBuffer[depthIndex] > pixelInput.sv_position.z)
 		{
-			
+			depthBuffer[depthIndex] = pixelInput.sv_position.z;
+
 			rt.drawPixelAt(
 				pixelInput.position.x,
 				pixelInput.position.y,
@@ -312,4 +314,15 @@ void ClearColor(BMP::BMP& rt)
 		}
 	}
 
+}
+
+void ClearDepth(float value, float * depthBuffer)
+{
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			depthBuffer[j * height + i] = value;
+		}
+	}
 }
