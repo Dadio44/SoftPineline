@@ -214,8 +214,7 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 
 		for (int x = minX; x <= maxX; x++)
 		{
-			if ((cx1 > 0 && cx2 > 0 && cx3 > 0) 
-				|| (cx1 < 0 && cx2 < 0 && cx3 < 0))
+			if ((cx1 >= 0 && cx2 >= 0 && cx3 >= 0))
 			{
 				Interpolation(
 					rasterOutput, 
