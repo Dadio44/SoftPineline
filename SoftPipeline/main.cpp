@@ -262,6 +262,7 @@ RasterOutput GetInterpolationValue(
 
 	res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
 	res.position = (v1.position * u + v2.position * v + v3.position * w);
+	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
 
 	return res;
 }
@@ -293,9 +294,9 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt, fl
 			depthBuffer[depthIndex] = pixelInput.sv_position.z;
 
 			rt.drawPixelAt(
-				pixelInput.position.x,
-				pixelInput.position.y,
-				pixelInput.position.z,
+				pixelInput.normal.x,
+				pixelInput.normal.y,
+				pixelInput.normal.z,
 				pixelInput.screenPos.x, pixelInput.screenPos.y);
 		}
 	}
