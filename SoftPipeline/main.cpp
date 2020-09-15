@@ -29,6 +29,9 @@ void Interpolation(
 	const RasterOutput& v1,
 	const RasterOutput& v2,
 	const RasterOutput& v3,
+	float u,
+	float v,
+	float w,
 	int x,
 	int y);
 
@@ -36,6 +39,9 @@ RasterOutput GetInterpolationValue(
 	const RasterOutput& v1,
 	const RasterOutput& v2,
 	const RasterOutput& v3,
+	float u,
+	float v,
+	float w,
 	int x,
 	int y);
 
@@ -48,7 +54,7 @@ int main()
 
 	Mesh mesh;
 
-	mesh.LoadFromFile("Torus Knot01.obj");
+	mesh.LoadFromFile("Sphere.obj");
 
 	//PrintMesh(mesh);
 
@@ -192,6 +198,10 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 	float cx2;
 	float cx3;
 
+	float square = f01 + f02 + f03;
+
+	float oneDevidesquare = 1.0f / square;
+
 	for (int y = minY; y <= maxY; y++)
 	{
 		cx1 = cy1;
@@ -203,7 +213,11 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 			if ((cx1 > 0 && cx2 > 0 && cx3 > 0) 
 				|| (cx1 < 0 && cx2 < 0 && cx3 < 0))
 			{
-				Interpolation(rasterOutput, v1, v2, v3,x,y);
+				Interpolation(
+					rasterOutput, 
+					v1, v2, v3, 
+					cx1 * oneDevidesquare, cx2 * oneDevidesquare, cx3 * oneDevidesquare,
+					x,y);
 			}
 
 			cx1 += i01; cx2 += i02; cx3 += i03;
@@ -221,16 +235,22 @@ void Interpolation(
 	const RasterOutput& v1,
 	const RasterOutput& v2,
 	const RasterOutput& v3,
+	float u,
+	float v,
+	float w,
 	int x,
 	int y)
 {
-	rasterOutput.push_back(GetInterpolationValue(v1, v2, v3, x,y));
+	rasterOutput.push_back(GetInterpolationValue(v1, v2, v3, u,v,w,x,y));
 }
 
 RasterOutput GetInterpolationValue(
 	const RasterOutput & v1,
 	const RasterOutput & v2, 
 	const RasterOutput & v3, 
+	float u,
+	float v,
+	float w,
 	int x,
 	int y)
 {
@@ -238,6 +258,9 @@ RasterOutput GetInterpolationValue(
 
 	res.screenPos.x = x;
 	res.screenPos.y = y;
+
+	res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
+	res.position = (v1.position * u + v2.position * v + v3.position * w);
 
 	return res;
 }
@@ -269,7 +292,12 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt)
 			pixelInput.screenPos.y >= 0
 			)
 		{
-			rt.drawPixelAt(255, 0, 0, pixelInput.screenPos.x, pixelInput.screenPos.y);
+			
+			rt.drawPixelAt(
+				fmax(0, pixelInput.position.x) * 255,
+				fmax(0, pixelInput.position.y) * 255,
+				fmax(0, pixelInput.position.z) * 255,
+				pixelInput.screenPos.x, pixelInput.screenPos.y);
 		}
 	}
 }
