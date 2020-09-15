@@ -92,7 +92,9 @@ namespace BMP {
 
 		~BMP();
 
-		void drawPixelAt(ColorPass r, ColorPass b, ColorPass g, unsigned x, unsigned y);
+		void drawPixelAt(ColorPass r, ColorPass g, ColorPass b, unsigned x, unsigned y);
+
+		void drawPixelAt(float r, float g, float b, unsigned x, unsigned y);
 
 		void drawPixelAt(const Color& c, unsigned x, unsigned y);
 

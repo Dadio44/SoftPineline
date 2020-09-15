@@ -124,6 +124,22 @@ namespace BMP {
 
 	}
 
+	void BMP::drawPixelAt(float r, float g, float b, unsigned x, unsigned y)
+	{
+		r = fmax(0, r);
+		r = fmin(1, r);
+		b = fmax(0, b);
+		b = fmin(1, b);
+		g = fmax(0, g);
+		g = fmin(1, g);
+
+		drawPixelAt(
+			(ColorPass)(r * 255),
+			(ColorPass)(g * 255), 
+			(ColorPass)(b * 255),
+			x, y);
+	}
+
 	void BMP::drawPixelAt(const Color & c, unsigned x, unsigned y)
 	{
 		drawPixelAt(c.r * 255, c.g * 255, c.b * 255, x, y);

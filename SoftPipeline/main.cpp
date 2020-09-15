@@ -294,9 +294,9 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt)
 		{
 			
 			rt.drawPixelAt(
-				fmax(0, pixelInput.position.x) * 255,
-				fmax(0, pixelInput.position.y) * 255,
-				fmax(0, pixelInput.position.z) * 255,
+				pixelInput.position.x,
+				pixelInput.position.y,
+				pixelInput.position.z,
 				pixelInput.screenPos.x, pixelInput.screenPos.y);
 		}
 	}
@@ -308,7 +308,7 @@ void ClearColor(BMP::BMP& rt)
 	{
 		for (int j = 0; j < height; j++)
 		{
-			rt.drawPixelAt(255, 255, 255, i, j);
+			rt.drawPixelAt(1.0f, 1.0f, 1.0f, i, j);
 		}
 	}
 
