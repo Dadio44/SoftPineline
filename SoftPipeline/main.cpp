@@ -55,7 +55,7 @@ int main()
 
 	Mesh mesh;
 
-	mesh.LoadFromFile("Cube.obj");
+	mesh.LoadFromFile("Torus Knot01.obj");
 
 	//PrintMesh(mesh);
 
@@ -116,8 +116,8 @@ void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOut
 {
 	glm::mat4x4 model = glm::mat4x4(1);
 	model = glm::translate(model, glm::vec3(0));
-	/*model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
-	model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));*/
+	model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
+	model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
 
 	glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, 5), glm::vec3(0), glm::vec3(0, 1, 0));
 	glm::mat4x4 projection = glm::perspective(glm::radians(60.0f),(float)width / height,0.3f,10.0f);
@@ -174,9 +174,9 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 	assert(0 <= minX && minX <= maxX && maxX <= width);
 	assert(0 <= minY && minY <= maxY && maxY <= height);
 
-	const glm::vec2& A = v1.FscreenPos;
-	const glm::vec2& B = v2.FscreenPos;
-	const glm::vec2& C = v3.FscreenPos;
+	const glm::vec2& A = v1.screenPos;
+	const glm::vec2& B = v2.screenPos;
+	const glm::vec2& C = v3.screenPos;
 	glm::vec2 P = glm::vec2(minX,minY);
 
 	float i01 = A.y - B.y;
@@ -219,7 +219,7 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 				Interpolation(
 					rasterOutput, 
 					v1, v2, v3, 
-					cx1 * oneDevidesquare, cx2 * oneDevidesquare, cx3 * oneDevidesquare,
+					cx2 * oneDevidesquare, cx3 * oneDevidesquare,  cx1 * oneDevidesquare,
 					x,y);
 			}
 
