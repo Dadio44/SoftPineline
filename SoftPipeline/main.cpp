@@ -66,8 +66,6 @@ int main()
 	std::vector<VertexOutPut> vsOutput(vsInput.size());
 	VertexShader(vsInput,vsOutput);
 
-	// TODO :clip
-
 	std::vector<RasterOutput> rasterOut;
 	Rasterize(vsOutput, rasterOut);
 
