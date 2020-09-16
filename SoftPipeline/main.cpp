@@ -55,7 +55,7 @@ int main()
 
 	Mesh mesh;
 
-	mesh.LoadFromFile("Torus Knot01.obj");
+	mesh.LoadFromFile("Cube.obj");
 
 	//PrintMesh(mesh);
 
@@ -129,7 +129,7 @@ void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOut
 		vsOutput[i].position = model * vsInput[i].position;
 		vsOutput[i].normal = model * vsInput[i].normal;
 		vsOutput[i].sv_position = vp * vsOutput[i].position;
-		vsOutput[i].uv = vsOutput[i].uv;
+		vsOutput[i].uv = vsInput[i].uv;
 	}
 }
 
