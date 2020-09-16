@@ -50,6 +50,8 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput,BMP::BMP& rt, BMP
 void ClearColor(BMP::BMP& rt);
 void ClearDepth(float value, float * depthBuffer);
 
+BMP::Color Lerp(BMP::Color c1, BMP::Color c2, float t);
+
 BMP::Color Sampler(const BMP::BMP& texture,float u,float v);
 
 int main()
@@ -123,7 +125,7 @@ void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOut
 	model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
 	model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
 
-	glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, 5), glm::vec3(0), glm::vec3(0, 1, 0));
+	glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, 1.5f), glm::vec3(0), glm::vec3(0, 1, 0));
 	glm::mat4x4 projection = glm::perspective(glm::radians(60.0f),(float)width / height,0.3f,10.0f);
 
 	glm::mat4x4 vp = projection * view;
@@ -328,15 +330,51 @@ void ClearDepth(float value, float * depthBuffer)
 	}
 }
 
+BMP::Color Lerp(BMP::Color c1, BMP::Color c2, float t)
+{
+	BMP::Color res;
+
+	res.r = c1.r + (c2.r - c1.r) * t;
+	res.g = c1.g + (c2.g - c1.g) * t;
+	res.b = c1.b + (c2.b - c1.b) * t;
+
+	return res;
+}
+
 BMP::Color Sampler(const BMP::BMP & texture, float u, float v)
 {
 	int width = texture.GetWidth();
 	int height = texture.GetHeight();
 
-	int x = (int)(u * width - 0.5f) % width;
-	int y = (int)(v * height - 0.5f) % height;
+	float ux = (u * width - 0.5f);
+	float uy = (v * height - 0.5f);
+
+	int x = (int)ux % width;
+	int y = (int)uy % height;
 	x = x < 0 ? width + x : x;
 	y = y < 0 ? height + y : y;
 
-	return texture.GetColorAt(x, y);
+	int x1 = glm::min(x + 1,width - 1);
+	int x2 = x;
+	int x3 = glm::min(x + 1, width - 1);
+
+	int y1 = y;
+	int y2 = glm::min(y + 1, height - 1);
+	int y3 = glm::min(y + 1, height - 1);
+
+	auto c0 = texture.GetColorAt(x, y);
+	auto c1 = texture.GetColorAt(x1, y1);
+	auto c2 = texture.GetColorAt(x2, y2);
+	auto c3 = texture.GetColorAt(x3, y3);
+
+	float uxc = fmax(0, ux);
+	float uyc = fmax(0, uy);
+
+	float ht = uxc - glm::floor(uxc);
+	float vt = uyc - glm::floor(uyc);
+	
+	auto ch1 = Lerp(c0,c1,ht);
+	auto ch2 = Lerp(c2,c3,ht);
+
+	return Lerp(ch1, ch2, vt);
 }
