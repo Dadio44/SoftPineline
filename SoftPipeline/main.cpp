@@ -50,6 +50,8 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput,BMP::BMP& rt, BMP
 void ClearColor(BMP::BMP& rt);
 void ClearDepth(float value, float * depthBuffer);
 
+BMP::Color Sampler(const BMP::BMP& texture,float u,float v);
+
 int main()
 {
 
@@ -267,6 +269,7 @@ RasterOutput GetInterpolationValue(
 	res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
 	res.position = (v1.position * u + v2.position * v + v3.position * w);
 	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
+	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w);
 
 	return res;
 }
@@ -296,16 +299,8 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt, BM
 			depthBuffer[depthIndex] = pixelInput.sv_position.z;
 
 			rt.drawPixelAt(
-				texture.GetColorAt(
-					pixelInput.screenPos.x % texture.GetWidth(), 
-					pixelInput.screenPos.y % texture.GetHeight())
-				, pixelInput.screenPos.x, pixelInput.screenPos.y);
-
-			/*rt.drawPixelAt(
-				pixelInput.normal.x,
-				pixelInput.normal.y,
-				pixelInput.normal.z,
-				pixelInput.screenPos.x, pixelInput.screenPos.y);*/
+				Sampler(texture, pixelInput.uv.x, pixelInput.uv.y),
+				pixelInput.screenPos.x, pixelInput.screenPos.y);
 		}
 	}
 }
@@ -331,4 +326,17 @@ void ClearDepth(float value, float * depthBuffer)
 			depthBuffer[j * height + i] = value;
 		}
 	}
+}
+
+BMP::Color Sampler(const BMP::BMP & texture, float u, float v)
+{
+	int width = texture.GetWidth();
+	int height = texture.GetHeight();
+
+	int x = (int)(u * width - 0.5f) % width;
+	int y = (int)(v * height - 0.5f) % height;
+	x = x < 0 ? width + x : x;
+	y = y < 0 ? height + y : y;
+
+	return texture.GetColorAt(x, y);
 }

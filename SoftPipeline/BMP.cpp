@@ -145,7 +145,7 @@ namespace BMP {
 		drawPixelAt(c.r, c.g, c.b, x, y);
 	}
 
-	Color BMP::GetColorAt(unsigned x, unsigned y)
+	Color BMP::GetColorAt(unsigned x, unsigned y) const
 	{
 		assert(x < _width);
 		assert(y < _height);

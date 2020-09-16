@@ -98,7 +98,7 @@ namespace BMP {
 
 		void drawPixelAt(const Color& c, unsigned x, unsigned y);
 
-		Color GetColorAt(unsigned x, unsigned y);
+		Color GetColorAt(unsigned x, unsigned y) const;
 
 		void writeImage(const char* name = NULL);
 
