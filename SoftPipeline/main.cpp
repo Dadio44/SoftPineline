@@ -46,7 +46,7 @@ RasterOutput GetInterpolationValue(
 	int y);
 
 RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-void PixelShader(const std::vector<RasterOutput>& rasterOutput,BMP::BMP& rt,float * depthBuffer);
+void PixelShader(const std::vector<RasterOutput>& rasterOutput,BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer);
 void ClearColor(BMP::BMP& rt);
 void ClearDepth(float value, float * depthBuffer);
 
@@ -76,7 +76,11 @@ int main()
 	ClearColor(rt);
 	ClearDepth(1, depthBuffer);
 
-	PixelShader(rasterOut,rt,depthBuffer);
+	BMP::BMP texture;
+
+	texture.ReadFrom("box.bmp");
+
+	PixelShader(rasterOut,rt,texture,depthBuffer);
 
 	rt.writeImage();
 	
@@ -281,7 +285,7 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
  	return rasterOutput;
 }
 
-void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt, float * depthBuffer)
+void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer)
 {
 	int depthIndex;
 	for (auto pixelInput : rasterOutput)
@@ -292,10 +296,16 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt, fl
 			depthBuffer[depthIndex] = pixelInput.sv_position.z;
 
 			rt.drawPixelAt(
+				texture.GetColorAt(
+					pixelInput.screenPos.x % texture.GetWidth(), 
+					pixelInput.screenPos.y % texture.GetHeight())
+				, pixelInput.screenPos.x, pixelInput.screenPos.y);
+
+			/*rt.drawPixelAt(
 				pixelInput.normal.x,
 				pixelInput.normal.y,
 				pixelInput.normal.z,
-				pixelInput.screenPos.x, pixelInput.screenPos.y);
+				pixelInput.screenPos.x, pixelInput.screenPos.y);*/
 		}
 	}
 }

@@ -142,7 +142,7 @@ namespace BMP {
 
 	void BMP::drawPixelAt(const Color & c, unsigned x, unsigned y)
 	{
-		drawPixelAt(c.r * 255, c.g * 255, c.b * 255, x, y);
+		drawPixelAt(c.r, c.g, c.b, x, y);
 	}
 
 	Color BMP::GetColorAt(unsigned x, unsigned y)
@@ -157,9 +157,11 @@ namespace BMP {
 		
 		Color res;
 
-		res.r = r;
-		res.g = g;
-		res.b = b;
+		float inv = 1.0f / 255;
+
+		res.r = r * inv;
+		res.g = g * inv;
+		res.b = b * inv;
 		
 		return res;
 	}
