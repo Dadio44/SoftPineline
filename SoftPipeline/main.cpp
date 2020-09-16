@@ -152,22 +152,22 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 	int minX = glm::min(v1.screenPos.x, v2.screenPos.x);
 	minX = glm::min(v3.screenPos.x, minX);
 	minX = glm::max(0, minX);
-	minX = glm::min(width, minX);
+	minX = glm::min(width - 1, minX);
 	
 	int maxX = glm::max(v1.screenPos.x, v2.screenPos.x);
 	maxX = glm::max(v3.screenPos.x, maxX);
 	maxX = glm::max(0, maxX);
-	maxX = glm::min(width, maxX);
+	maxX = glm::min(width - 1, maxX);
 
 	int minY = glm::min(v1.screenPos.y, v2.screenPos.y);
 	minY = glm::min(v3.screenPos.y, minY);
 	minY = glm::max(0, minY);
-	minY = glm::min(height,minY);
+	minY = glm::min(height - 1,minY);
 
 	int maxY = glm::max(v1.screenPos.y, v2.screenPos.y);
 	maxY = glm::max(v3.screenPos.y, maxY);
 	maxY = glm::max(0, maxY);
-	maxY = glm::min(height, maxY);
+	maxY = glm::min(height - 1, maxY);
 
 	assert(0 <= minX && minX <= maxX && maxX <= width);
 	assert(0 <= minY && minY <= maxY && maxY <= height);
@@ -275,8 +275,8 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
 	rasterOutput.normal = vertex.normal;
 	rasterOutput.position = vertex.position;
 	rasterOutput.uv = vertex.uv;
-	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * width;
-	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * height;
+	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * (width - 1);
+	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * (height - 1);
 
  	return rasterOutput;
 }
