@@ -269,11 +269,12 @@ RasterOutput GetInterpolationValue(
 	res.screenPos.y = y;
 
 	res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
-	res.position = (v1.position * u + v2.position * v + v3.position * w);
-	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
-
-	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w);
-	res.uv = res.uv / res.uv.z;
+	
+	float sw = 1 / res.sv_position.w;
+	
+	res.position = (v1.position * u + v2.position * v + v3.position * w) * sw;
+	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w) * sw;
+	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w) * sw;
 
 	return res;
 }
@@ -285,9 +286,10 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
 	float invW = 1 / vertex.sv_position.w;
 
 	rasterOutput.sv_position = vertex.sv_position * invW;
-	rasterOutput.normal = vertex.normal;
-	rasterOutput.position = vertex.position;
-	rasterOutput.uv = glm::vec3(vertex.uv, 1) * invW;
+	rasterOutput.sv_position.w = invW;
+	rasterOutput.normal = vertex.normal * invW;
+	rasterOutput.position = vertex.position * invW;
+	rasterOutput.uv = vertex.uv * invW;
 	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * (width - 1);
 	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * (height - 1);
 
