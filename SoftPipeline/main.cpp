@@ -272,9 +272,13 @@ RasterOutput GetInterpolationValue(
 	
 	float sw = 1 / res.sv_position.w;
 	
-	res.position = (v1.position * u + v2.position * v + v3.position * w) * sw;
-	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w) * sw;
-	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w) * sw;
+	u = u * sw;
+	v = v * sw;
+	w = w * sw;
+
+	res.position = (v1.position * u + v2.position * v + v3.position * w);
+	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
+	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w);
 
 	return res;
 }
