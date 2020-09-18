@@ -379,8 +379,8 @@ BMP::Color Sampler(const BMP::BMP & texture, float u, float v)
 	float uxc = fmax(0, ux);
 	float uyc = fmax(0, uy);
 
-	float ht = uxc - glm::floor(uxc);
-	float vt = uyc - glm::floor(uyc);
+	float ht = glm::fract(uxc);
+	float vt = glm::fract(uyc);
 	
 	auto ch1 = Lerp(c0,c1,ht);
 	auto ch2 = Lerp(c2,c3,ht);
