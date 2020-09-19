@@ -14,18 +14,19 @@
 int width = 1920;
 int height = 1080;
 
+BMP::BMP rt;
+float* depthBuffer;
+BMP::BMP texture;
 
 void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
 void VertexShader(const std::vector<VertexInput>& vsInput,std::vector<VertexOutPut>& vsOutput);
-void Rasterize(const std::vector<VertexOutPut>& vsOutput,std::vector<RasterOutput>& rasterOutput);
+void Rasterize(const std::vector<VertexOutPut>& vsOutput);
 void DrawTriangle(
-	std::vector<RasterOutput>& rasterOutput, 
 	const RasterOutput& v1, 
 	const RasterOutput& v2, 
 	const RasterOutput& v3);
 
-void Interpolation(
-	std::vector<RasterOutput>& rasterOutput, 
+void DrawPixel(
 	const RasterOutput& v1,
 	const RasterOutput& v2,
 	const RasterOutput& v3,
@@ -46,7 +47,7 @@ RasterOutput GetInterpolationValue(
 	int y);
 
 RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-void PixelShader(const std::vector<RasterOutput>& rasterOutput,BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer);
+void PixelShader(const RasterOutput& pixelInput,BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer);
 void ClearColor(BMP::BMP& rt);
 void ClearDepth(float value, float * depthBuffer);
 
@@ -70,21 +71,15 @@ int main()
 	std::vector<VertexOutPut> vsOutput(vsInput.size());
 	VertexShader(vsInput,vsOutput);
 
-	std::vector<RasterOutput> rasterOut;
-	Rasterize(vsOutput, rasterOut);
-
-	BMP::BMP rt;
-	float* depthBuffer = static_cast<float*>(malloc(sizeof(float) * width * height));
+	depthBuffer = static_cast<float*>(malloc(sizeof(float) * width * height));
 
 	rt.SetOutPut("renderTarget.bmp", width, height);
 	ClearColor(rt);
 	ClearDepth(1, depthBuffer);
 
-	BMP::BMP texture;
-
 	texture.ReadFrom("box.bmp");
 
-	PixelShader(rasterOut,rt,texture,depthBuffer);
+	Rasterize(vsOutput);
 
 	rt.writeImage();
 	
@@ -141,13 +136,13 @@ void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOut
 	}
 }
 
-void Rasterize(const std::vector<VertexOutPut>& vsOutput, std::vector<RasterOutput>& rasterOutput)
+void Rasterize(const std::vector<VertexOutPut>& vsOutput)
 {
 	int size = vsOutput.size();
 
 	for (int i = 0; i < size; i += 3)
 	{
-		DrawTriangle(rasterOutput, 
+		DrawTriangle( 
 			GetRasterOutput(vsOutput[i]),
 			GetRasterOutput(vsOutput[i + 1]),
 			GetRasterOutput(vsOutput[i + 2]));
@@ -155,7 +150,7 @@ void Rasterize(const std::vector<VertexOutPut>& vsOutput, std::vector<RasterOutp
 
 }
 
-void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3)
+void DrawTriangle(const RasterOutput & v1, const RasterOutput & v2, const RasterOutput & v3)
 {
 	int minX = glm::min(v1.screenPos.x, v2.screenPos.x);
 	minX = glm::min(v3.screenPos.x, minX);
@@ -222,8 +217,7 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 		{
 			if ((cx1 >= 0 && cx2 >= 0 && cx3 >= 0))
 			{
-				Interpolation(
-					rasterOutput, 
+				DrawPixel( 
 					v1, v2, v3, 
 					cx2 * oneDevidesquare, cx3 * oneDevidesquare,  cx1 * oneDevidesquare,
 					x,y);
@@ -239,8 +233,7 @@ void DrawTriangle(std::vector<RasterOutput>& rasterOutput, const RasterOutput & 
 
 }
 
-void Interpolation(
-	std::vector<RasterOutput>& rasterOutput,
+void DrawPixel(
 	const RasterOutput& v1,
 	const RasterOutput& v2,
 	const RasterOutput& v3,
@@ -250,7 +243,11 @@ void Interpolation(
 	int x,
 	int y)
 {
-	rasterOutput.push_back(GetInterpolationValue(v1, v2, v3, u,v,w,x,y));
+	PixelShader(
+		GetInterpolationValue(v1, v2, v3, u, v, w, x, y),
+		rt, 
+		texture, 
+		depthBuffer);
 }
 
 RasterOutput GetInterpolationValue(
@@ -300,11 +297,10 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
  	return rasterOutput;
 }
 
-void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer)
+void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer)
 {
 	int depthIndex;
-	for (auto pixelInput : rasterOutput)
-	{
+	
 		depthIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * height;
 		if (depthBuffer[depthIndex] > pixelInput.sv_position.z)
 		{
@@ -313,7 +309,6 @@ void PixelShader(const std::vector<RasterOutput>& rasterOutput, BMP::BMP& rt, BM
 				Sampler(texture, pixelInput.uv.x, pixelInput.uv.y),
 				pixelInput.screenPos.x, pixelInput.screenPos.y);
 		}
-	}
 }
 
 void ClearColor(BMP::BMP& rt)
