@@ -376,11 +376,8 @@ BMP::Color Sampler(const BMP::BMP & texture, float u, float v)
 	auto c2 = texture.GetColorAt(x2, y2);
 	auto c3 = texture.GetColorAt(x3, y3);
 
-	float uxc = fmax(0, ux);
-	float uyc = fmax(0, uy);
-
-	float ht = glm::fract(uxc);
-	float vt = glm::fract(uyc);
+	float ht = glm::fract(ux);
+	float vt = glm::fract(uy);
 	
 	auto ch1 = Lerp(c0,c1,ht);
 	auto ch2 = Lerp(c2,c3,ht);
