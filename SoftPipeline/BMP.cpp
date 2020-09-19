@@ -145,7 +145,7 @@ namespace BMP {
 		drawPixelAt(c.r, c.g, c.b, x, y);
 	}
 
-	Color BMP::GetColorAt(unsigned x, unsigned y) const
+	void BMP::GetColorAt(unsigned x, unsigned y, Color* color) const
 	{
 		assert(x < _width);
 		assert(y < _height);
@@ -155,15 +155,11 @@ namespace BMP {
 		ColorPass g = _buffer[(y * _rowSize + x) * BYTES_OF_PIXEL + 1];
 		ColorPass r = _buffer[(y * _rowSize + x) * BYTES_OF_PIXEL + 2];
 		
-		Color res;
-
 		float inv = 1.0f / 255;
 
-		res.r = r * inv;
-		res.g = g * inv;
-		res.b = b * inv;
-		
-		return res;
+		color->r = r * inv;
+		color->g = g * inv;
+		color->b = b * inv;
 	}
 	
 	void BMP::writeImage(const char* name)
@@ -180,205 +176,6 @@ namespace BMP {
 		fclose(f);
 	}
 
-	Color BMP::NearPointColor(unsigned x, unsigned y)
-	{
-		unsigned r, b, g;
-		Color t;
-
-		unsigned cnt = 0;
-
-		r = b = g = 0;
-
-
-		if (x - 1 < _width)
-		{
-			t = GetColorAt(x - 1, y);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (x + 1 < _width)
-		{
-			t = GetColorAt(x + 1, y);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (y - 1 < _height)
-		{
-			t = GetColorAt(x, y - 1);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (y + 1 < _height)
-		{
-			t = GetColorAt(x, y + 1);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		r /= cnt;
-		g /= cnt;
-		b /= cnt;
-
-		Color res;
-
-		res.r = r;
-		res.g = g;
-		res.b = b;
-
-		return res;
-	}
-
-	Color BMP::NearEightPointColor(unsigned x, unsigned y)
-	{
-		unsigned r, b, g;
-		Color t;
-
-		unsigned cnt = 0;
-
-		r = b = g = 0;
-
-
-		if (x - 1 < _width)
-		{
-			t = GetColorAt(x - 1, y);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (x + 1 < _width)
-		{
-			t = GetColorAt(x + 1, y);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (y - 1 < _height)
-		{
-			t = GetColorAt(x, y - 1);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (y + 1 < _height)
-		{
-			t = GetColorAt(x, y + 1);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (x - 1 < _width && y - 1 < _height)
-		{
-			t = GetColorAt(x - 1, y - 1);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (x - 1 < _width && y + 1 < _height)
-		{
-			t = GetColorAt(x - 1, y + 1);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (x + 1 < _width && y - 1 < _height)
-		{
-			t = GetColorAt(x + 1, y - 1);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		if (x + 1 < _width && y + 1 < _height)
-		{
-			t = GetColorAt(x + 1, y + 1);
-			r += t.r;
-			g += t.g;
-			b += t.b;
-			cnt += 1;
-		}
-
-		r /= cnt;
-		g /= cnt;
-		b /= cnt;
-
-		Color res;
-
-		res.r = r;
-		res.g = g;
-		res.b = b;
-
-		return res;
-	}
-
-	std::vector<Pixel> BMP::NearPointPixels(int x, int y, int n)
-	{
-		std::vector<Pixel> res;
-
-		unsigned tx, ty;
-
-		Pixel pixel;
-
-		for (int i = x - n; i <= x + n; i++)
-			for (int j = y - n; j <= y + n; j++)
-			{
-				if (i == x && j == y)
-					continue;
-				tx = i;
-				ty = j;
-				if (i < 0)
-				{
-					tx = _width - (tx + 2);
-				}
-
-				if (i >= _width)
-				{
-					tx = i % _width;
-				}
-
-				if (j < 0)
-				{
-					ty = _height - (ty + 2);
-				}
-
-				if (j >= _height)
-				{
-					ty = j % _height;
-				}
-
-				pixel.color = GetColorAt(tx, ty);
-				pixel.x = tx;
-				pixel.y = ty;
-
-				res.push_back(pixel);
-			}
-
-		return res;
-	}
-	
 	Color::Color():Color(0,0,0)
 	{
 	}

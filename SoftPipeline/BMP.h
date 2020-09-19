@@ -98,19 +98,9 @@ namespace BMP {
 
 		void drawPixelAt(const Color& c, unsigned x, unsigned y);
 
-		Color GetColorAt(unsigned x, unsigned y) const;
+		void GetColorAt(unsigned x, unsigned y, Color* color) const;
 
 		void writeImage(const char* name = NULL);
-
-		//取像素周围 4 个 像素颜色插值
-		Color NearPointColor(unsigned x, unsigned y);
-		
-		//取像素周围 8 个 像素颜色插值
-		Color NearEightPointColor(unsigned x, unsigned y);
-
-		//取像素周围 (2 * n + 1) ^ 2 - 1 个像素
-		std::vector<Pixel> NearPointPixels(int x, int y, int n = 1);
-
 	};
 
 }

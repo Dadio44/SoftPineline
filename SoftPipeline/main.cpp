@@ -366,10 +366,15 @@ BMP::Color Sampler(const BMP::BMP & texture, float u, float v)
 	int y2 = glm::min(y + 1, height - 1);
 	int y3 = glm::min(y + 1, height - 1);
 
-	auto c0 = texture.GetColorAt(x, y);
-	auto c1 = texture.GetColorAt(x1, y1);
-	auto c2 = texture.GetColorAt(x2, y2);
-	auto c3 = texture.GetColorAt(x3, y3);
+	BMP::Color c0;
+	BMP::Color c1;
+	BMP::Color c2;
+	BMP::Color c3;
+
+	texture.GetColorAt(x,  y,  &c0);
+	texture.GetColorAt(x1, y1, &c1);
+	texture.GetColorAt(x2, y2, &c2);
+	texture.GetColorAt(x3, y3, &c3);
 
 	float ht = glm::fract(ux);
 	float vt = glm::fract(uy);
