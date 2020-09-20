@@ -26,6 +26,27 @@ namespace BMP {
 		return _width;
 	}
 
+	void BMP::GetResolution(int mipmapLevel, int& width, int& height)const
+	{
+		width = _width;
+		height = _height;
+
+		int curLevel = 0;
+
+		while (width > 1 && height > 1)
+		{
+			if (mipmapLevel == curLevel)
+			{
+				break;
+			}
+
+			width = width / 2;
+			height = height / 2;
+
+			curLevel += 1;
+		}
+	}
+
 	UINT32 BMP::GetHeight()const
 	{
 		return _height;
@@ -273,6 +294,8 @@ namespace BMP {
 
 		int oldWidth = _width;
 
+		_maxMipmapLevel = 0;
+
 		while (curResolutionX > 0 && curResolutionY > 0)
 		{
 			WriteMipMap(offset, srcOffset, oldWidth, curResolutionX, curResolutionY);
@@ -284,6 +307,7 @@ namespace BMP {
 			curResolutionY = (curResolutionY / 2);
 			
 			oldWidth = (oldWidth / 2);
+			_maxMipmapLevel += 1;
 		}
 
 	}
@@ -329,7 +353,7 @@ namespace BMP {
 		mipMap.writeImage();
 	}
 
-	Color BMP::GetColorAt(unsigned x, unsigned y, int mipmapLevel)
+	Color BMP::GetColorAt(unsigned x, unsigned y, int mipmapLevel)const
 	{
 		Color res;
 

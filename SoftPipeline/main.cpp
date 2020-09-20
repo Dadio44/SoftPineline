@@ -34,7 +34,8 @@ void DrawPixel(
 	float v,
 	float w,
 	int x,
-	int y);
+	int y, 
+	float mipMap);
 
 RasterOutput GetInterpolationValue(
 	const RasterOutput& v1,
@@ -47,13 +48,13 @@ RasterOutput GetInterpolationValue(
 	int y);
 
 RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-void PixelShader(const RasterOutput& pixelInput,BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer);
+void PixelShader(const RasterOutput& pixelInput,BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer,float mipMap);
 void ClearColor(BMP::BMP& rt);
 void ClearDepth(float value, float * depthBuffer);
 
 BMP::Color Lerp(BMP::Color c1, BMP::Color c2, float t);
 
-BMP::Color Sampler(const BMP::BMP& texture,float u,float v);
+BMP::Color Sampler(const BMP::BMP& texture,float u,float v, float mipmapLevel);
 
 int main()
 {
@@ -81,9 +82,9 @@ int main()
 	texture.GenerateMipMap();
 	texture.writeMipMapImage("mipMap.bmp");
 
-	//Rasterize(vsOutput);
+	Rasterize(vsOutput);
 
-	//rt.writeImage();
+	rt.writeImage();
 	
 	free(depthBuffer);
 
@@ -222,7 +223,8 @@ void DrawTriangle(const RasterOutput & v1, const RasterOutput & v2, const Raster
 				DrawPixel( 
 					v1, v2, v3, 
 					cx2 * oneDevidesquare, cx3 * oneDevidesquare,  cx1 * oneDevidesquare,
-					x,y);
+					x,y, 
+					square);
 			}
 
 			cx1 += i01; cx2 += i02; cx3 += i03;
@@ -243,13 +245,15 @@ void DrawPixel(
 	float v,
 	float w,
 	int x,
-	int y)
+	int y,
+	float mipmapLv)
 {
 	PixelShader(
 		GetInterpolationValue(v1, v2, v3, u, v, w, x, y),
 		rt, 
 		texture, 
-		depthBuffer);
+		depthBuffer,
+		mipmapLv);
 }
 
 RasterOutput GetInterpolationValue(
@@ -299,15 +303,22 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
  	return rasterOutput;
 }
 
-void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer)
+void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer, float mipmapLv)
 {
-	int depthIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * width;
+	int srcPosIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * height;
 
-	if (depthBuffer[depthIndex] > pixelInput.sv_position.z)
+	
+	if (depthBuffer[srcPosIndex] > pixelInput.sv_position.z)
 	{
-		depthBuffer[depthIndex] = pixelInput.sv_position.z;
+		int size = texture.GetWidth() * texture.GetHeight() / 2;
+
+		float lv = (1 - glm::min(1.0f,mipmapLv / size));
+		lv = glm::pow(lv,4);
+		lv *= texture.GetMaxMipMapLevel();
+
+		depthBuffer[srcPosIndex] = pixelInput.sv_position.z;
 		rt.drawPixelAt(
-			Sampler(texture, pixelInput.uv.x, pixelInput.uv.y),
+			Sampler(texture, pixelInput.uv.x, pixelInput.uv.y, lv),
 			pixelInput.screenPos.x, pixelInput.screenPos.y);
 	}
 }
@@ -346,10 +357,14 @@ BMP::Color Lerp(BMP::Color c1, BMP::Color c2, float t)
 	return res;
 }
 
-BMP::Color Sampler(const BMP::BMP & texture, float u, float v)
+BMP::Color Sampler(const BMP::BMP & texture, float u, float v, float mipmapLevel)
 {
-	int width = texture.GetWidth();
-	int height = texture.GetHeight();
+	int lv = (int)mipmapLevel;
+
+	int width;
+	int height;
+
+	texture.GetResolution(lv, width, height);
 
 	float ux = (u * width - 0.5f);
 	float uy = (v * height - 0.5f);
@@ -367,15 +382,12 @@ BMP::Color Sampler(const BMP::BMP & texture, float u, float v)
 	int y2 = glm::min(y + 1, height - 1);
 	int y3 = glm::min(y + 1, height - 1);
 
-	BMP::Color c0;
-	BMP::Color c1;
-	BMP::Color c2;
-	BMP::Color c3;
 
-	texture.GetColorAt(x,  y,  &c0);
-	texture.GetColorAt(x1, y1, &c1);
-	texture.GetColorAt(x2, y2, &c2);
-	texture.GetColorAt(x3, y3, &c3);
+	BMP::Color c0 = texture.GetColorAt(x, y,lv);
+	BMP::Color c1 = texture.GetColorAt(x1, y1, lv);
+	BMP::Color c2 = texture.GetColorAt(x2, y2, lv);
+	BMP::Color c3 = texture.GetColorAt(x3, y3, lv);
+
 
 	float ht = glm::fract(ux);
 	float vt = glm::fract(uy);
