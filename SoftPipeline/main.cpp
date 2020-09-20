@@ -9,7 +9,6 @@
 #include <VertexInput.h>
 #include <VertexOutPut.h>
 #include <RasterOutput.h>
-#include <RasterPixel.h>
 
 int width = 1920;
 int height = 1080;
