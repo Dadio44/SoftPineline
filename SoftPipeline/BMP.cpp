@@ -58,27 +58,27 @@ namespace BMP {
 		UINT32 imageSize = _height * _rowSize * BYTES_OF_PIXEL;// assert the bits of pixel is 24 = 3 * 8
 		
 		// initialize the DIB header
-		bitmapFileHeader.signature = _SIGNATURE;
-		bitmapFileHeader.fileSize = sizeof(BITMAPFILEHEADER) + sizeof(DIBHEADER) + imageSize;
-		bitmapFileHeader.reserved = 0;
-		bitmapFileHeader.fileOffsetToPixelArray = sizeof(BITMAPFILEHEADER) + sizeof(DIBHEADER);
+		_bitmapFileHeader.signature = _SIGNATURE;
+		_bitmapFileHeader.fileSize = sizeof(BITMAPFILEHEADER) + sizeof(DIBHEADER) + imageSize;
+		_bitmapFileHeader.reserved = 0;
+		_bitmapFileHeader.fileOffsetToPixelArray = sizeof(BITMAPFILEHEADER) + sizeof(DIBHEADER);
 
 
 		// initialize the DIB header
-		dibHeader.dibHeaderSize = sizeof(DIBHEADER);
-		dibHeader.imageWidth = _width;
-		dibHeader.imageHeight = _height;
-		dibHeader.planes = 1;
-		dibHeader.bitsPerPixel = _BITS_OF_PIXEL;
-		dibHeader.compression = _COMPRESSION;
-		dibHeader.imageSize = sizeof(UINT8) * imageSize;
-		dibHeader.xPiexlPerMeter = _X_PIXEL_PER_METER;
-		dibHeader.yPiexlPerMeter = _Y_PIXEL_PER_METER;
-		dibHeader.colorsInColorTable = _COLORS_IN_COLOR_TABLE;
-		dibHeader.importantColorCount = _IMPORTANT_COLOR_COUNT;
+		_dibHeader.dibHeaderSize = sizeof(DIBHEADER);
+		_dibHeader.imageWidth = _rowSize;
+		_dibHeader.imageHeight = _height;
+		_dibHeader.planes = 1;
+		_dibHeader.bitsPerPixel = _BITS_OF_PIXEL;
+		_dibHeader.compression = _COMPRESSION;
+		_dibHeader.imageSize = sizeof(UINT8) * imageSize;
+		_dibHeader.xPiexlPerMeter = _X_PIXEL_PER_METER;
+		_dibHeader.yPiexlPerMeter = _Y_PIXEL_PER_METER;
+		_dibHeader.colorsInColorTable = _COLORS_IN_COLOR_TABLE;
+		_dibHeader.importantColorCount = _IMPORTANT_COLOR_COUNT;
 
 		// malloc the memories of buffer
-		_buffer = static_cast<UINT8*>(malloc(dibHeader.imageSize));
+		_buffer = static_cast<UINT8*>(malloc(_dibHeader.imageSize));
 	}
 
 	void BMP::ReadFrom(const char * fileName)
@@ -87,17 +87,17 @@ namespace BMP {
 
 		FILE* f = fopen(fileName, "rb");
 	
-		fread(&(this->bitmapFileHeader), sizeof(BITMAPFILEHEADER), 1, f);
-		fread(&(this->dibHeader), sizeof(DIBHEADER), 1, f);
+		fread(&(this->_bitmapFileHeader), sizeof(BITMAPFILEHEADER), 1, f);
+		fread(&(this->_dibHeader), sizeof(DIBHEADER), 1, f);
 
 		if (this->_buffer)
 			free(this->_buffer);
-		this->_buffer = static_cast<UINT8*>(malloc(dibHeader.imageSize));
+		this->_buffer = static_cast<UINT8*>(malloc(_dibHeader.imageSize));
 
-		fread(this->_buffer, sizeof(UINT8), dibHeader.imageSize,f);
+		fread(this->_buffer, sizeof(UINT8), _dibHeader.imageSize,f);
 
-		this->_width = dibHeader.imageWidth;
-		this->_height = dibHeader.imageHeight;
+		this->_width = _dibHeader.imageWidth;
+		this->_height = _dibHeader.imageHeight;
 		this->_rowSize = ALIGN(_width, 4);
 
 		assert(_width);
@@ -110,6 +110,7 @@ namespace BMP {
 	BMP::~BMP()
 	{
 		free(_buffer);
+		free(_mipMapBuffer);
 	}
 
 	void BMP::drawPixelAt(ColorPass r, ColorPass g, ColorPass b, unsigned x, unsigned y)
@@ -169,11 +170,183 @@ namespace BMP {
 		FILE* f = fopen(name, "wb");
 		assert(f);
 
-		fwrite(&bitmapFileHeader, sizeof(bitmapFileHeader),1,f);
-		fwrite(&dibHeader, sizeof(dibHeader), 1, f);
-		fwrite(_buffer, dibHeader.imageSize, 1, f);
+		fwrite(&_bitmapFileHeader, sizeof(_bitmapFileHeader),1,f);
+		fwrite(&_dibHeader, sizeof(_dibHeader), 1, f);
+		fwrite(_buffer, _dibHeader.imageSize, 1, f);
 
 		fclose(f);
+	}
+
+	void BMP::WriteMipMap(int offset, int sourceOffset, int srcWidth, int resolutionX, int resolutionY)
+	{
+		int last = offset + resolutionX * resolutionY;
+
+		int r, g, b;
+		
+		int tsOffset;
+		int csRowOffsetStart = sourceOffset;
+		int csOffset = sourceOffset;
+
+		for (;offset < last; offset++)
+		{
+			r = g = b = 0;
+
+			tsOffset = csOffset;
+			b += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL];
+			g += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL + 1];
+			r += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL + 2];
+
+			tsOffset = csOffset + 1;
+			b += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL];
+			g += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL + 1];
+			r += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL + 2];
+
+			tsOffset = csOffset + srcWidth;
+			b += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL];
+			g += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL + 1];
+			r += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL + 2];
+
+			tsOffset = tsOffset + 1;
+			b += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL];
+			g += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL + 1];
+			r += _mipMapBuffer[(tsOffset) * BYTES_OF_PIXEL + 2];
+
+			_mipMapBuffer[(offset) * BYTES_OF_PIXEL] = b * 0.25f;
+			_mipMapBuffer[(offset) * BYTES_OF_PIXEL + 1] = g * 0.25f;
+			_mipMapBuffer[(offset) * BYTES_OF_PIXEL + 2] = r * 0.25f;
+
+			csOffset += 2;
+			if (csOffset - csRowOffsetStart >= (srcWidth & 0xfffffffe))
+			{
+				csRowOffsetStart += 2 * srcWidth;
+				csOffset = csRowOffsetStart;
+			}
+		}
+	}
+
+	void BMP::GetMipmapData(int mipmapLevel, int& offset, int& rowSize) const
+	{
+		int curResolutionX = _width;
+		int curResolutionY = _height;
+
+		offset = 0;
+
+		int curLevel = 0;
+
+		while (curResolutionX > 1 && curResolutionY > 1)
+		{
+			if (mipmapLevel == curLevel)
+			{
+				break;
+			}
+
+			offset += curResolutionX * curResolutionY;
+
+			curResolutionX = curResolutionX / 2;
+			curResolutionY = curResolutionY / 2;
+
+			curLevel += 1;
+		}
+
+		rowSize = curResolutionX;
+	}
+
+	void BMP::GenerateMipMap()
+	{
+		if (_mipMapBuffer != nullptr)
+		{
+			free(_mipMapBuffer);
+		}
+
+		int total = (_width * _height);
+
+		_mipMapBuffer = static_cast<UINT8*>(malloc(BYTES_OF_PIXEL * (total + total / 2)));
+
+		memcpy(_mipMapBuffer, _buffer, total * BYTES_OF_PIXEL);
+
+
+		int curResolutionX = _width / 2;
+		int curResolutionY = _height / 2;
+
+		int srcOffset = 0;
+		int offset = total;
+
+		int oldWidth = _width;
+
+		while (curResolutionX > 0 && curResolutionY > 0)
+		{
+			WriteMipMap(offset, srcOffset, oldWidth, curResolutionX, curResolutionY);
+
+			srcOffset = offset;
+			offset += curResolutionX * curResolutionY;
+
+			curResolutionX = (curResolutionX / 2);
+			curResolutionY = (curResolutionY / 2);
+			
+			oldWidth = (oldWidth / 2);
+		}
+
+	}
+
+	void BMP::writeMipMapImage(const char * name)
+	{
+		BMP mipMap;
+		
+		UINT32 mipmapWidth = _width + _width / 2;
+
+		mipMap.SetOutPut(name, mipmapWidth, _height);
+
+
+		for (int i = 0; i < _width; i++)
+		{
+			for (int j = 0; j < _height; j++)
+			{
+				mipMap.drawPixelAt(GetColorAt(i,j,0), i, j);
+			}
+		}
+
+		UINT32 cWidth = _width / 2;
+		UINT32 sy = 0;
+		UINT32 cHeight = _height / 2;
+		UINT32 mipMapLevel = 1;
+
+		while (cWidth > 0)
+		{
+			for (int i = 0; i < cWidth; i++)
+			{
+				for (int j = 0; j < cHeight; j++)
+				{
+					mipMap.drawPixelAt(GetColorAt(i, j, mipMapLevel), i + _width, j + sy);
+				}
+			}
+
+			cWidth /= 2;
+			sy += cHeight;
+			cHeight /= 2;
+			mipMapLevel += 1;
+		}
+
+		mipMap.writeImage();
+	}
+
+	Color BMP::GetColorAt(unsigned x, unsigned y, int mipmapLevel)
+	{
+		Color res;
+
+		int offset, rowSize;
+		GetMipmapData(mipmapLevel,offset, rowSize);
+
+		ColorPass b = _mipMapBuffer[(offset + (y * rowSize + x)) * BYTES_OF_PIXEL];
+		ColorPass g = _mipMapBuffer[(offset + (y * rowSize + x)) * BYTES_OF_PIXEL + 1];
+		ColorPass r = _mipMapBuffer[(offset + (y * rowSize + x)) * BYTES_OF_PIXEL + 2];
+
+		float inv = 1.0f / 255;
+
+		res.r = r * inv;
+		res.g = g * inv;
+		res.b = b * inv;
+
+		return res;
 	}
 
 	Color::Color():Color(0,0,0)

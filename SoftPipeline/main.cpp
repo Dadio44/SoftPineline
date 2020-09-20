@@ -78,10 +78,12 @@ int main()
 	ClearDepth(1, depthBuffer);
 
 	texture.ReadFrom("box.bmp");
+	texture.GenerateMipMap();
+	texture.writeMipMapImage("mipMap.bmp");
 
-	Rasterize(vsOutput);
+	//Rasterize(vsOutput);
 
-	rt.writeImage();
+	//rt.writeImage();
 	
 	free(depthBuffer);
 

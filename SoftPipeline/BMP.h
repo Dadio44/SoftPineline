@@ -76,9 +76,12 @@ namespace BMP {
 		UINT32 _height;
 		UINT8* _buffer;
 		UINT32 _rowSize;
-		BITMAPFILEHEADER bitmapFileHeader;
-		DIBHEADER dibHeader;
+		BITMAPFILEHEADER _bitmapFileHeader;
+		DIBHEADER _dibHeader;
+		UINT8* _mipMapBuffer;
 
+		void WriteMipMap(int offset,int sourceOffset, int srcWidth, int resolutionX, int resolutionY);
+		void GetMipmapData(int mipmapLevel,int& offset,int& rowSize)const;
 	public:
 
 		UINT32 GetWidth()const;
@@ -101,6 +104,12 @@ namespace BMP {
 		void GetColorAt(unsigned x, unsigned y, Color* color) const;
 
 		void writeImage(const char* name = NULL);
+
+		void GenerateMipMap();
+
+		void writeMipMapImage(const char* name = NULL);
+
+		Color GetColorAt(unsigned x, unsigned y, int mipmapLevel);		
 	};
 
 }
