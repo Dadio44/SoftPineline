@@ -301,16 +301,15 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
 
 void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer)
 {
-	int depthIndex;
-	
-		depthIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * height;
-		if (depthBuffer[depthIndex] > pixelInput.sv_position.z)
-		{
-			depthBuffer[depthIndex] = pixelInput.sv_position.z;
-			rt.drawPixelAt(
-				Sampler(texture, pixelInput.uv.x, pixelInput.uv.y),
-				pixelInput.screenPos.x, pixelInput.screenPos.y);
-		}
+	int depthIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * width;
+
+	if (depthBuffer[depthIndex] > pixelInput.sv_position.z)
+	{
+		depthBuffer[depthIndex] = pixelInput.sv_position.z;
+		rt.drawPixelAt(
+			Sampler(texture, pixelInput.uv.x, pixelInput.uv.y),
+			pixelInput.screenPos.x, pixelInput.screenPos.y);
+	}
 }
 
 void ClearColor(BMP::BMP& rt)
