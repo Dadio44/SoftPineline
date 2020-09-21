@@ -304,7 +304,7 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
 
 void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer, float mipmapLv)
 {
-	int srcPosIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * height;
+	int srcPosIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * width;
 
 	
 	if (depthBuffer[srcPosIndex] > pixelInput.sv_position.z)
@@ -340,7 +340,7 @@ void ClearDepth(float value, float * depthBuffer)
 	{
 		for (int i = 0; i < width; i++)
 		{
-			depthBuffer[j * height + i] = value;
+			depthBuffer[j * width + i] = value;
 		}
 	}
 }
