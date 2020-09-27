@@ -1,2 +1,2 @@
-# SoftPineline
+# SoftPipeline
 简单的软光栅实现
