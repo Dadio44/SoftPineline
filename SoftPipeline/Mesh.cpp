@@ -39,6 +39,7 @@ void Mesh::LoadFromFile(const char * filaName)
 
 	_buffer = static_cast<unsigned char*>(malloc(size));
 
+	assert(_buffer != 0);
 	readCnt = fread(_buffer, sizeof(unsigned char), size, f);
 	assert(readCnt == size);
 

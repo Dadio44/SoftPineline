@@ -1,21 +1,24 @@
 #include <vector>
 #include <iostream>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <BMP.h>
-#include <Mesh.h>
-#include <test.h>
-#include <VertexInput.h>
-#include <VertexOutPut.h>
-#include <RasterOutput.h>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
-int width = 1920;
-int height = 1080;
+
+#include "test.h"
+#include "BMP.h"
+#include "RasterOutput.h"
+#include "VertexInput.h"
+#include "Mesh.h"
+#include "VertexOutPut.h"
+
+int width = 1920 * 2;
+int height = 1080 * 2;
 
 BMP::BMP rt;
 float* depthBuffer;
 BMP::BMP texture;
+RasterOutput* rasterOutBuffer;
 
 void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
 void VertexShader(const std::vector<VertexInput>& vsInput,std::vector<VertexOutPut>& vsOutput);
@@ -26,12 +29,7 @@ void DrawTriangle(
 	const RasterOutput& v3);
 
 void DrawPixel(
-	const RasterOutput& v1,
-	const RasterOutput& v2,
-	const RasterOutput& v3,
-	float u,
-	float v,
-	float w,
+	const RasterOutput& v,
 	int x,
 	int y, 
 	float mipMap);
@@ -55,37 +53,45 @@ BMP::Color Lerp(BMP::Color c1, BMP::Color c2, float t);
 
 BMP::Color Sampler(const BMP::BMP& texture,float u,float v, float mipmapLevel);
 
+void Render(const char* meshPath, const char* texturePath,const glm::vec3& pos);
+
+glm::vec3 currentPos;
+
+void RenderHero(glm::vec3 pos)
+{
+	Render("Hair009.obj", "hair.bmp", pos);
+	Render("Body010.obj", "body.bmp", pos);
+	Render("Face009.obj", "face.bmp", pos);
+}
+
 int main()
 {
 
-	Mesh mesh;
-
-	mesh.LoadFromFile("Cube.obj");
-
-	//PrintMesh(mesh);
-
-	std::vector<VertexInput> vsInput(mesh.GetIndicesCount());
-
-	GetVsInputs(mesh, vsInput);
-
-	std::vector<VertexOutPut> vsOutput(vsInput.size());
-	VertexShader(vsInput,vsOutput);
-
 	depthBuffer = static_cast<float*>(malloc(sizeof(float) * width * height));
+
+	rasterOutBuffer = static_cast<RasterOutput*>(malloc(sizeof(RasterOutput) * width * height));
 
 	rt.SetOutPut("renderTarget.bmp", width, height);
 	ClearColor(rt);
 	ClearDepth(1, depthBuffer);
 
-	texture.ReadFrom("box.bmp");
-	texture.GenerateMipMap();
-	texture.writeMipMapImage("mipMap.bmp");
+	glm::vec3 offset(3.679, 2.5, -1.1434);
 
-	Rasterize(vsOutput);
+	/*RenderHero(glm::vec3(1,0,0) - offset);
+	RenderHero(glm::vec3(-1,0, 0) - offset);*/
+	
+	RenderHero(glm::vec3(0) - offset);
+	/*RenderHero(glm::vec3(1,0,0) - offset);
+	RenderHero(glm::vec3(-1,0,0) - offset);
+	RenderHero(glm::vec3(0,1,0) - offset);
+	RenderHero(glm::vec3(0,-1,0) - offset);*/
+
+	
 
 	rt.writeImage();
 	
 	free(depthBuffer);
+	free(rasterOutBuffer);
 
 	//system("pause");
 
@@ -118,12 +124,12 @@ void GetVsInputs(const Mesh & mesh, std::vector<VertexInput>& vsInput)
 void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOutPut>& vsOutput)
 {
 	glm::mat4x4 model = glm::mat4x4(1);
-	model = glm::translate(model, glm::vec3(0));
-	model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
-	model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
+	model = glm::translate(model, currentPos);
+	//model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
+	//model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
 
-	glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, 1.5f), glm::vec3(0), glm::vec3(0, 1, 0));
-	glm::mat4x4 projection = glm::perspective(glm::radians(60.0f),(float)width / height,0.3f,10.0f);
+	glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0,2.5f), glm::vec3(0), glm::vec3(0, 1, 0));
+	glm::mat4x4 projection = glm::perspective(glm::radians(60.0f),(float)width / height,0.3f,100.0f);
 
 	glm::mat4x4 vp = projection * view;
 
@@ -207,7 +213,17 @@ void DrawTriangle(const RasterOutput & v1, const RasterOutput & v2, const Raster
 
 	float square = f01 + f02 + f03;
 
-	float oneDevidesquare = 1.0f / square;
+	//面积小于等于0，丢弃
+	if (square <= 0)
+	{
+		return;
+	}
+
+	float oneDevidesquare = 1.0f / square;	
+
+	int triWidth = maxX - minX + 1;
+
+	
 
 	for (int y = minY; y <= maxY; y++)
 	{
@@ -217,13 +233,14 @@ void DrawTriangle(const RasterOutput & v1, const RasterOutput & v2, const Raster
 
 		for (int x = minX; x <= maxX; x++)
 		{
+			int srcPosIndex = x + y * width;
 			if ((cx1 >= 0 && cx2 >= 0 && cx3 >= 0))
 			{
-				DrawPixel( 
-					v1, v2, v3, 
-					cx2 * oneDevidesquare, cx3 * oneDevidesquare,  cx1 * oneDevidesquare,
-					x,y, 
-					square);
+				rasterOutBuffer[srcPosIndex] = GetInterpolationValue(v1, v2, v3, cx2 * oneDevidesquare, cx3 * oneDevidesquare, cx1 * oneDevidesquare, x, y);
+			}
+			else
+			{
+				rasterOutBuffer[srcPosIndex].screenPos.x = -1;
 			}
 
 			cx1 += i01; cx2 += i02; cx3 += i03;
@@ -234,21 +251,101 @@ void DrawTriangle(const RasterOutput & v1, const RasterOutput & v2, const Raster
 		cy3 += j03;
 	}
 
+	int preX;
+	int preY;
+
+	for (int y = minY; y <= maxY; y++)
+	{
+		for (int x = minX; x <= maxX; x++)
+		{
+			int srcPosIndex = x + y * width;
+			RasterOutput& ro = rasterOutBuffer[srcPosIndex];
+
+			if (ro.screenPos.x < 0)
+				continue;
+
+			// 深度测试
+			if (depthBuffer[srcPosIndex] > ro.sv_position.z)
+			{
+				
+				preX = srcPosIndex;
+				if (x <= minX)
+				{
+					if (x < maxX)
+					{
+						preX++;
+					}
+				}
+				else
+				{
+					if (rasterOutBuffer[preX - 1].screenPos.x < 0)
+					{
+						if (x < maxX)
+						{
+							preX++;
+						}
+					}
+					else
+					{
+						preX--;
+					}
+				}
+
+				preY = srcPosIndex;
+				if (y <= minY)
+				{
+					if (y < maxY)
+					{
+						preY += width;
+					}
+				}
+				else
+				{
+					if (rasterOutBuffer[preY - width].screenPos.x < 0)
+					{
+						if (y < maxY)
+						{
+							preY += width;
+						}
+					}
+					else
+					{
+						preY -= width;
+					}
+				}
+
+				glm::vec2 dx = rasterOutBuffer[preX].screenPos.x >= 0 ? (rasterOutBuffer[preX].uv - ro.uv) : glm::vec2(0, 0);
+				glm::vec2 dy = rasterOutBuffer[preY].screenPos.x >= 0 ? (rasterOutBuffer[preY].uv - ro.uv) : glm::vec2(0, 0);
+
+				dx.x *= texture.GetWidth();
+				dy.x *= texture.GetWidth();
+				dx.y *= texture.GetHeight();
+				dy.y *= texture.GetHeight();
+
+
+				float rho = glm::max(glm::dot(dx, dx), glm::dot(dy, dy));
+				float lambda = 0.5 * log2(rho);
+
+				float d = glm::max(lambda, 0.0f);
+
+
+				DrawPixel(ro, x, y, d);
+
+				depthBuffer[srcPosIndex] = ro.sv_position.z;
+
+			}
+		}
+	}
 }
 
 void DrawPixel(
-	const RasterOutput& v1,
-	const RasterOutput& v2,
-	const RasterOutput& v3,
-	float u,
-	float v,
-	float w,
+	const RasterOutput& v,
 	int x,
 	int y,
 	float mipmapLv)
 {
 	PixelShader(
-		GetInterpolationValue(v1, v2, v3, u, v, w, x, y),
+		v,
 		rt, 
 		texture, 
 		depthBuffer,
@@ -304,22 +401,9 @@ RasterOutput GetRasterOutput(const VertexOutPut & vertex)
 
 void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, BMP::BMP& texture, float * depthBuffer, float mipmapLv)
 {
-	int srcPosIndex = pixelInput.screenPos.x + pixelInput.screenPos.y * width;
-
-	
-	if (depthBuffer[srcPosIndex] > pixelInput.sv_position.z)
-	{
-		int size = texture.GetWidth() * texture.GetHeight() / 2;
-
-		float lv = (1 - glm::min(1.0f,mipmapLv / size));
-		lv = glm::pow(lv,4);
-		lv *= texture.GetMaxMipMapLevel();
-
-		depthBuffer[srcPosIndex] = pixelInput.sv_position.z;
-		rt.drawPixelAt(
-			Sampler(texture, pixelInput.uv.x, pixelInput.uv.y, lv),
-			pixelInput.screenPos.x, pixelInput.screenPos.y);
-	}
+	rt.drawPixelAt(
+		Sampler(texture, pixelInput.uv.x, pixelInput.uv.y, mipmapLv),
+		pixelInput.screenPos.x, pixelInput.screenPos.y);
 }
 
 void ClearColor(BMP::BMP& rt)
@@ -395,4 +479,28 @@ BMP::Color Sampler(const BMP::BMP & texture, float u, float v, float mipmapLevel
 	auto ch2 = Lerp(c2,c3,ht);
 
 	return Lerp(ch1, ch2, vt);
+}
+
+void Render(const char* meshPath, const char* texturePath, const glm::vec3& pos)
+{
+	currentPos = pos;
+	Mesh mesh;
+
+	mesh.LoadFromFile(meshPath);
+
+	//PrintMesh(mesh);
+
+	std::vector<VertexInput> vsInput(mesh.GetIndicesCount());
+
+	GetVsInputs(mesh, vsInput);
+
+	std::vector<VertexOutPut> vsOutput(vsInput.size());
+	VertexShader(vsInput, vsOutput);
+
+	texture.ReadFrom(texturePath);
+	texture.GenerateMipMap();
+	//std::string mipmapPath(texturePath);
+	//texture.writeMipMapImage(mipmapPath.replace(mipmapPath.find(".bmp"),4, "_mipmap.bmp").c_str());
+
+	Rasterize(vsOutput);
 }
