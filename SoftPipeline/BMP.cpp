@@ -428,6 +428,23 @@ namespace BMP {
 		return Lerp(ch1, ch2, vt);
 	}
 
+	Color BMP::Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy) const
+	{
+		ddx.x *= GetWidth();
+		ddy.x *= GetWidth();
+		ddx.y *= GetHeight();
+		ddy.y *= GetHeight();
+
+
+		float rho = glm::max(glm::dot(ddx, ddx), glm::dot(ddy, ddy));
+		float lambda = 0.5 * log2(rho);
+
+		float d = glm::max(lambda, 0.0f);
+
+
+		return Sampler(u, v, d);
+	}
+
 	Color::Color():Color(0,0,0)
 	{
 	}

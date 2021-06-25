@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 
+#include "glm/glm.hpp"
+
 namespace BMP {
 
 	typedef unsigned short UINT16;
@@ -120,6 +122,8 @@ namespace BMP {
 		Color Lerp(Color c1, Color c2, float t)const;
 
 		Color Sampler(float u, float v, float mipmapLevel)const;
+
+		Color Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy)const;
 	};
 
 }

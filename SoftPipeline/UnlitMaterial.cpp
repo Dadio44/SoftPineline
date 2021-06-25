@@ -29,18 +29,5 @@ BMP::Color UnlitMaterial::PixelShader(const RasterOutput& pixelInput, const Rast
 	glm::vec2 ddx = rx.uv - pixelInput.uv;
 	glm::vec2 ddy = ry.uv - pixelInput.uv;
 
-
-	ddx.x *= _mainTex->GetWidth();
-	ddy.x *= _mainTex->GetWidth();
-	ddx.y *= _mainTex->GetHeight();
-	ddy.y *= _mainTex->GetHeight();
-
-
-	float rho = glm::max(glm::dot(ddx, ddx), glm::dot(ddy, ddy));
-	float lambda = 0.5 * log2(rho);
-
-	float d = glm::max(lambda, 0.0f);
-
-
-	return _mainTex->Sampler(pixelInput.uv.x, pixelInput.uv.y, 0);
+	return _mainTex->Sampler(pixelInput.uv.x, pixelInput.uv.y, ddx, ddy);
 }
