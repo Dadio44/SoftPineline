@@ -47,7 +47,7 @@ public:
 		int y);
 
 	RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-	void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, const BMP::BMP& texture, float* depthBuffer, float mipMap);
+	void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, const BMP::BMP& texture, float mipMap);
 	void ClearColor(BMP::BMP& rt);
 	void ClearDepth(float value, float* depthBuffer);
 

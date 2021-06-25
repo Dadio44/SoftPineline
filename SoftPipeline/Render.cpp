@@ -246,12 +246,7 @@ void Render::DrawPixel(
 	int y,
 	float mipmapLv)
 {
-	PixelShader(
-		v,
-		rt,
-		*texture,
-		depthBuffer,
-		mipmapLv);
+	PixelShader(v,rt,*texture,mipmapLv);
 }
 
 RasterOutput Render::GetInterpolationValue(
@@ -301,7 +296,7 @@ RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 	return rasterOutput;
 }
 
-void Render::PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, const BMP::BMP& texture, float* depthBuffer, float mipmapLv)
+void Render::PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, const BMP::BMP& texture, float mipmapLv)
 {
 	rt.drawPixelAt(
 		Sampler(texture, pixelInput.uv.x, pixelInput.uv.y, mipmapLv),
