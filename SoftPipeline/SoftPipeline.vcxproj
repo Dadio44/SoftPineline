@@ -153,14 +153,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BMP.cpp" />
+    <ClCompile Include="BMPManager.cpp" />
+    <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Render.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BMP.h" />
+    <ClInclude Include="BMPManager.h" />
+    <ClInclude Include="MeshManager.h" />
+    <ClInclude Include="IResouceManager.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="RasterOutput.h" />
+    <ClInclude Include="Render.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="VertexInput.h" />
     <ClInclude Include="VertexOutPut.h" />
