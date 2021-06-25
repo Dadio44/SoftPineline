@@ -30,11 +30,7 @@ public:
 		const RasterOutput& v2,
 		const RasterOutput& v3);
 
-	void DrawPixel(
-		const RasterOutput& v,
-		int x,
-		int y,
-		float mipMap);
+	void DrawPixel(const RasterOutput& v,float mipMap);
 
 	RasterOutput GetInterpolationValue(
 		const RasterOutput& v1,
@@ -47,7 +43,7 @@ public:
 		int y);
 
 	RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-	void PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, const BMP::BMP& texture, float mipMap);
+	BMP::Color PixelShader(const RasterOutput& pixelInput,const BMP::BMP& texture, float mipMap);
 	void ClearColor(BMP::BMP& rt);
 	void ClearDepth(float value, float* depthBuffer);
 

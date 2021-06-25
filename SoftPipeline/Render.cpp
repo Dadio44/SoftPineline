@@ -231,7 +231,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 				float d = glm::max(lambda, 0.0f);
 
 
-				DrawPixel(ro, x, y, d);
+				DrawPixel(ro,d);
 
 				depthBuffer[srcPosIndex] = ro.sv_position.z;
 
@@ -240,13 +240,9 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 	}
 }
 
-void Render::DrawPixel(
-	const RasterOutput& v,
-	int x,
-	int y,
-	float mipmapLv)
+void Render::DrawPixel(const RasterOutput& v,float mipmapLv)
 {
-	PixelShader(v,rt,*texture,mipmapLv);
+	rt.drawPixelAt(PixelShader(v, *texture, mipmapLv),v.screenPos.x, v.screenPos.y);
 }
 
 RasterOutput Render::GetInterpolationValue(
@@ -296,11 +292,9 @@ RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 	return rasterOutput;
 }
 
-void Render::PixelShader(const RasterOutput& pixelInput, BMP::BMP& rt, const BMP::BMP& texture, float mipmapLv)
+BMP::Color Render::PixelShader(const RasterOutput& pixelInput, const BMP::BMP& texture, float mipmapLv)
 {
-	rt.drawPixelAt(
-		Sampler(texture, pixelInput.uv.x, pixelInput.uv.y, mipmapLv),
-		pixelInput.screenPos.x, pixelInput.screenPos.y);
+	return Sampler(texture, pixelInput.uv.x, pixelInput.uv.y, mipmapLv);
 }
 
 void Render::ClearColor(BMP::BMP& rt)
