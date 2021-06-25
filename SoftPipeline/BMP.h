@@ -116,6 +116,10 @@ namespace BMP {
 		void writeMipMapImage(const char* name = NULL);
 
 		Color GetColorAt(unsigned x, unsigned y, int mipmapLevel)const;
+
+		Color Lerp(Color c1, Color c2, float t)const;
+
+		Color Sampler(float u, float v, float mipmapLevel)const;
 	};
 
 }

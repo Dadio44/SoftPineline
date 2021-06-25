@@ -9,18 +9,18 @@
 #include "MeshManager.h"
 #include "BMPManager.h"
 #include "Model.h"
+#include "UnlitMaterial.h"
+
+const int SRC_WIDTH = 1920;
+const int SRC_HEIGHT = 1080;
 
 using namespace ResourceManager;
 
-
-int main()
+void RenderHero(
+	Render& render, 
+	std::shared_ptr<MeshManager>& meshManager,
+	std::shared_ptr<BMPManager>& bmpManager)
 {
-	std::shared_ptr<MeshManager> meshManager = std::make_shared<MeshManager>();
-	std::shared_ptr<BMPManager> bmpManager = std::make_shared<BMPManager>();
-
-	Render render;
-	render.Init();
-
 	Model hero;
 
 	std::vector<std::string> meshs;
@@ -35,16 +35,37 @@ int main()
 	textures.push_back("Body.bmp");
 	textures.push_back("Face.bmp");
 
-	hero.LoadTextures(bmpManager, textures);
-
 	glm::vec3 offset(3.679, 2.5, -1.1434);
 
-	hero.SetPos(glm::vec3(0) - offset);
+	glm::vec3 pos = glm::vec3(0) - offset;
+
+	std::vector<IMaterial*> materials;
+
+	for (auto path : textures)
+	{
+		auto id = bmpManager->Load(path);
+		materials.push_back(new UnlitMaterial(
+			bmpManager->Get(id),
+			pos,
+			SRC_WIDTH,
+			SRC_HEIGHT));
+	}
+
+	hero.SetMaterials(materials);
 	hero.Render(render);
+}
+
+int main()
+{
+	std::shared_ptr<MeshManager> meshManager = std::make_shared<MeshManager>();
+	std::shared_ptr<BMPManager> bmpManager = std::make_shared<BMPManager>();
+
+	Render render;
+	render.Init(SRC_WIDTH, SRC_HEIGHT);
+
+	RenderHero(render, meshManager, bmpManager);
 
 	render.output();
-
-	//RenderHero(glm::vec3(0) - offset);
 
 	//system("pause");
 

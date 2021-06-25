@@ -2,7 +2,6 @@
 
 
 #include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 #include "BMP.h"
@@ -10,27 +9,33 @@
 #include "VertexInput.h"
 #include "Mesh.h"
 #include "VertexOutPut.h"
+#include "IVertexShader.h"
+#include "IPixelShader.h"
 
 class Render
 {
-public:
-	int width = 1920 * 2;
-	int height = 1080 * 2;
+private:
+	int _width;
+	int _height;
 
 	BMP::BMP rt;
 	float* depthBuffer;
-	const BMP::BMP* texture;
 	RasterOutput* rasterOutBuffer;
 
+	const IVertexShader* _vs;
+	const IPixelShader* _ps;
+
+public:
+	
+
 	void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
-	void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOutPut>& vsOutput);
 	void Rasterize(const std::vector<VertexOutPut>& vsOutput);
 	void DrawTriangle(
 		const RasterOutput& v1,
 		const RasterOutput& v2,
 		const RasterOutput& v3);
 
-	void DrawPixel(const RasterOutput& v,float mipMap);
+	void DrawPixel(const RasterOutput& v, const RasterOutput& dx, const RasterOutput& dy);
 
 	RasterOutput GetInterpolationValue(
 		const RasterOutput& v1,
@@ -43,25 +48,24 @@ public:
 		int y);
 
 	RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-	BMP::Color PixelShader(const RasterOutput& pixelInput,const BMP::BMP& texture, float mipMap);
 	void ClearColor(BMP::BMP& rt);
 	void ClearDepth(float value, float* depthBuffer);
 
-	BMP::Color Lerp(BMP::Color c1, BMP::Color c2, float t);
+	void SetShader(const IVertexShader* vs, const IPixelShader* ps);
 
-	BMP::Color Sampler(const BMP::BMP& texture, float u, float v, float mipmapLevel);
+	void Draw(const Mesh& mesh);
 
-	void Draw(const Mesh& mesh,const BMP::BMP& tex, const glm::vec3& pos);
-
-	glm::vec3 currentPos;
-
-	void Init()
+	void Init(int width,int height)
 	{
-		depthBuffer = static_cast<float*>(malloc(sizeof(float) * width * height));
+		_width = width;
+		_height = height;
 
-		rasterOutBuffer = static_cast<RasterOutput*>(malloc(sizeof(RasterOutput) * width * height));
 
-		rt.SetOutPut("renderTarget.bmp", width, height);
+		depthBuffer = static_cast<float*>(malloc(sizeof(float) * _width * _height));
+
+		rasterOutBuffer = static_cast<RasterOutput*>(malloc(sizeof(RasterOutput) * _width * _height));
+
+		rt.SetOutPut("renderTarget.bmp", _width, _height);
 		ClearColor(rt);
 		ClearDepth(1, depthBuffer);
 	}

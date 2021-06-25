@@ -160,10 +160,14 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="UnlitMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BMP.h" />
     <ClInclude Include="BMPManager.h" />
+    <ClInclude Include="IMaterial.h" />
+    <ClInclude Include="IPixelShader.h" />
+    <ClInclude Include="IVertexShader.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="IResouceManager.h" />
     <ClInclude Include="Mesh.h" />
@@ -171,6 +175,7 @@
     <ClInclude Include="RasterOutput.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="test.h" />
+    <ClInclude Include="UnlitMaterial.h" />
     <ClInclude Include="VertexInput.h" />
     <ClInclude Include="VertexOutPut.h" />
   </ItemGroup>

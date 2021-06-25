@@ -23,29 +23,6 @@ void Render::GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput)
 	}
 }
 
-void Render::VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOutPut>& vsOutput)
-{
-	glm::mat4x4 model = glm::mat4x4(1);
-	model = glm::translate(model, currentPos);
-	//model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
-	//model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
-
-	glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, 2.5f), glm::vec3(0), glm::vec3(0, 1, 0));
-	glm::mat4x4 projection = glm::perspective(glm::radians(60.0f), (float)width / height, 0.3f, 100.0f);
-
-	glm::mat4x4 vp = projection * view;
-
-	int cnt = vsInput.size();
-
-	for (int i = 0; i < cnt; i++)
-	{
-		vsOutput[i].position = model * vsInput[i].position;
-		vsOutput[i].normal = model * vsInput[i].normal;
-		vsOutput[i].sv_position = vp * vsOutput[i].position;
-		vsOutput[i].uv = vsInput[i].uv;
-	}
-}
-
 void Render::Rasterize(const std::vector<VertexOutPut>& vsOutput)
 {
 	int size = vsOutput.size();
@@ -65,25 +42,25 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 	int minX = glm::min(v1.screenPos.x, v2.screenPos.x);
 	minX = glm::min(v3.screenPos.x, minX);
 	minX = glm::max(0, minX);
-	minX = glm::min(width - 1, minX);
+	minX = glm::min(_width - 1, minX);
 
 	int maxX = glm::max(v1.screenPos.x, v2.screenPos.x);
 	maxX = glm::max(v3.screenPos.x, maxX);
 	maxX = glm::max(0, maxX);
-	maxX = glm::min(width - 1, maxX);
+	maxX = glm::min(_width - 1, maxX);
 
 	int minY = glm::min(v1.screenPos.y, v2.screenPos.y);
 	minY = glm::min(v3.screenPos.y, minY);
 	minY = glm::max(0, minY);
-	minY = glm::min(height - 1, minY);
+	minY = glm::min(_height - 1, minY);
 
 	int maxY = glm::max(v1.screenPos.y, v2.screenPos.y);
 	maxY = glm::max(v3.screenPos.y, maxY);
 	maxY = glm::max(0, maxY);
-	maxY = glm::min(height - 1, maxY);
+	maxY = glm::min(_height - 1, maxY);
 
-	assert(0 <= minX && minX <= maxX && maxX <= width);
-	assert(0 <= minY && minY <= maxY && maxY <= height);
+	assert(0 <= minX && minX <= maxX && maxX <= _width);
+	assert(0 <= minY && minY <= maxY && maxY <= _height);
 
 	const glm::vec2& A = v1.screenPos;
 	const glm::vec2& B = v2.screenPos;
@@ -135,7 +112,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 
 		for (int x = minX; x <= maxX; x++)
 		{
-			int srcPosIndex = x + y * width;
+			int srcPosIndex = x + y * _width;
 			if ((cx1 >= 0 && cx2 >= 0 && cx3 >= 0))
 			{
 				rasterOutBuffer[srcPosIndex] = GetInterpolationValue(v1, v2, v3, cx2 * oneDevidesquare, cx3 * oneDevidesquare, cx1 * oneDevidesquare, x, y);
@@ -160,7 +137,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 	{
 		for (int x = minX; x <= maxX; x++)
 		{
-			int srcPosIndex = x + y * width;
+			int srcPosIndex = x + y * _width;
 			RasterOutput& ro = rasterOutBuffer[srcPosIndex];
 
 			if (ro.screenPos.x < 0)
@@ -198,40 +175,29 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 				{
 					if (y < maxY)
 					{
-						preY += width;
+						preY += _width;
 					}
 				}
 				else
 				{
-					if (rasterOutBuffer[preY - width].screenPos.x < 0)
+					if (rasterOutBuffer[preY - _width].screenPos.x < 0)
 					{
 						if (y < maxY)
 						{
-							preY += width;
+							preY += _width;
 						}
 					}
 					else
 					{
-						preY -= width;
+						preY -= _width;
 					}
 				}
 
-				glm::vec2 dx = rasterOutBuffer[preX].screenPos.x >= 0 ? (rasterOutBuffer[preX].uv - ro.uv) : glm::vec2(0, 0);
-				glm::vec2 dy = rasterOutBuffer[preY].screenPos.x >= 0 ? (rasterOutBuffer[preY].uv - ro.uv) : glm::vec2(0, 0);
 
-				dx.x *= texture->GetWidth();
-				dy.x *= texture->GetWidth();
-				dx.y *= texture->GetHeight();
-				dy.y *= texture->GetHeight();
+				RasterOutput& rox = rasterOutBuffer[preX].screenPos.x >= 0 ? rasterOutBuffer[preX] : ro;
+				RasterOutput& roy = rasterOutBuffer[preY].screenPos.x >= 0 ? rasterOutBuffer[preY] : ro;
 
-
-				float rho = glm::max(glm::dot(dx, dx), glm::dot(dy, dy));
-				float lambda = 0.5 * log2(rho);
-
-				float d = glm::max(lambda, 0.0f);
-
-
-				DrawPixel(ro,d);
+				DrawPixel(ro,rox,roy);
 
 				depthBuffer[srcPosIndex] = ro.sv_position.z;
 
@@ -240,9 +206,9 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 	}
 }
 
-void Render::DrawPixel(const RasterOutput& v,float mipmapLv)
+void Render::DrawPixel(const RasterOutput& v, const RasterOutput& dx, const RasterOutput& dy)
 {
-	rt.drawPixelAt(PixelShader(v, *texture, mipmapLv),v.screenPos.x, v.screenPos.y);
+	rt.drawPixelAt(_ps->PixelShader(v,dx,dy), v.screenPos.x, v.screenPos.y);
 }
 
 RasterOutput Render::GetInterpolationValue(
@@ -286,22 +252,18 @@ RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 	rasterOutput.normal = vertex.normal * invW;
 	rasterOutput.position = vertex.position * invW;
 	rasterOutput.uv = vertex.uv * invW;
-	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * (width - 1);
-	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * (height - 1);
+	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * (_width - 1);
+	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * (_height - 1);
 
 	return rasterOutput;
 }
 
-BMP::Color Render::PixelShader(const RasterOutput& pixelInput, const BMP::BMP& texture, float mipmapLv)
-{
-	return Sampler(texture, pixelInput.uv.x, pixelInput.uv.y, mipmapLv);
-}
 
 void Render::ClearColor(BMP::BMP& rt)
 {
-	for (int i = 0; i < width; i++)
+	for (int i = 0; i < _width; i++)
 	{
-		for (int j = 0; j < height; j++)
+		for (int j = 0; j < _height; j++)
 		{
 			rt.drawPixelAt(0.0f, 0.0f, 0.0f, i, j);
 		}
@@ -311,79 +273,31 @@ void Render::ClearColor(BMP::BMP& rt)
 
 void Render::ClearDepth(float value, float* depthBuffer)
 {
-	for (int j = 0; j < height; j++)
+	for (int j = 0; j < _height; j++)
 	{
-		for (int i = 0; i < width; i++)
+		for (int i = 0; i < _width; i++)
 		{
-			depthBuffer[j * width + i] = value;
+			depthBuffer[j * _width + i] = value;
 		}
 	}
 }
 
-BMP::Color Render::Lerp(BMP::Color c1, BMP::Color c2, float t)
+void Render::SetShader(const IVertexShader* vs, const IPixelShader* ps)
 {
-	BMP::Color res;
-
-	res.r = c1.r + (c2.r - c1.r) * t;
-	res.g = c1.g + (c2.g - c1.g) * t;
-	res.b = c1.b + (c2.b - c1.b) * t;
-
-	return res;
+	_vs = vs;
+	_ps = ps;
 }
 
-BMP::Color Render::Sampler(const BMP::BMP& texture, float u, float v, float mipmapLevel)
+
+
+void Render::Draw(const Mesh& mesh)
 {
-	int lv = (int)mipmapLevel;
-
-	int width;
-	int height;
-
-	texture.GetResolution(lv, width, height);
-
-	float ux = (u * width - 0.5f);
-	float uy = (v * height - 0.5f);
-
-	int x = (int)ux % width;
-	int y = (int)uy % height;
-	x = x < 0 ? width + x : x;
-	y = y < 0 ? height + y : y;
-
-	int x1 = glm::min(x + 1, width - 1);
-	int x2 = x;
-	int x3 = glm::min(x + 1, width - 1);
-
-	int y1 = y;
-	int y2 = glm::min(y + 1, height - 1);
-	int y3 = glm::min(y + 1, height - 1);
-
-
-	BMP::Color c0 = texture.GetColorAt(x, y, lv);
-	BMP::Color c1 = texture.GetColorAt(x1, y1, lv);
-	BMP::Color c2 = texture.GetColorAt(x2, y2, lv);
-	BMP::Color c3 = texture.GetColorAt(x3, y3, lv);
-
-
-	float ht = glm::fract(ux);
-	float vt = glm::fract(uy);
-
-	auto ch1 = Lerp(c0, c1, ht);
-	auto ch2 = Lerp(c2, c3, ht);
-
-	return Lerp(ch1, ch2, vt);
-}
-
-void Render::Draw(const Mesh& mesh, const BMP::BMP& texture , const glm::vec3& pos)
-{
-	currentPos = pos;
-	
 	std::vector<VertexInput> vsInput(mesh.GetIndicesCount());
 
 	GetVsInputs(mesh, vsInput);
 
 	std::vector<VertexOutPut> vsOutput(vsInput.size());
-	VertexShader(vsInput, vsOutput);
-
-	this->texture = &texture;
+	_vs->VertexShader(vsInput, vsOutput);
 	//texture.ReadFrom(texturePath);
 	//texture.GenerateMipMap();
 	//std::string mipmapPath(texturePath);

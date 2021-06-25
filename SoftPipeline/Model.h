@@ -4,12 +4,15 @@
 #include "BMPManager.h"
 #include "Render.h"
 #include <memory>
+#include "IMaterial.h"
 
 class Model
 {
 public:
 
-	void LoadMeshes(std::shared_ptr<ResourceManager::MeshManager> meshManager,const std::vector<std::string> meshesPath)
+	void LoadMeshes(
+		std::shared_ptr<ResourceManager::MeshManager> meshManager,
+		const std::vector<std::string> meshesPath)
 	{
 		_meshManager = meshManager;
 		for (auto path : meshesPath)
@@ -18,36 +21,39 @@ public:
 		}	
 	}
 
-	void LoadTextures(std::shared_ptr<ResourceManager::BMPManager> texManager, const std::vector<std::string> texturesPath)
+	void SetMaterials(const std::vector<IMaterial*> mats)
 	{
-		_texManager = texManager;
-		for (auto path : texturesPath)
-		{
-			_textures.push_back(texManager->Load(path));
-		}
+		_materials = mats;
 	}
 
-
-
-	void SetPos(const glm::vec3 pos)
-	{
-		_pos = pos;
-	}
 
 	void Render(Render& render)
 	{
 		auto cnt = _meshes.size();
+
+		if (cnt > 0)
+			assert(cnt == _materials.size());
+
 		for(int i = 0;i < cnt;i++)
 		{
-			render.Draw(*_meshManager->Get(_meshes[i]),*_texManager->Get(_textures[i]), _pos);
+			IMaterial* mat = _materials[i];
+			render.SetShader(mat, mat);
+			render.Draw(*_meshManager->Get(_meshes[i]));
+		}
+	}
+
+
+	~Model()
+	{
+		for (auto mat : _materials)
+		{
+			delete mat;
 		}
 	}
 
 private:
+	std::vector<IMaterial*> _materials;
 	std::vector<ResourceManager::ResHandler> _meshes;
-	std::vector<ResourceManager::ResHandler> _textures;
-	glm::vec3 _pos;
 	std::shared_ptr<ResourceManager::MeshManager> _meshManager;
-	std::shared_ptr<ResourceManager::BMPManager> _texManager;
 };
 

@@ -3,6 +3,9 @@
 #include <cassert>
 #include <cstdio>
 
+#include "glm/glm.hpp"
+
+
 #define _SIGNATURE 0x4d42
 #define _BITS_OF_PIXEL 24
 #define _COMPRESSION 0
@@ -371,6 +374,58 @@ namespace BMP {
 		res.b = b * inv;
 
 		return res;
+	}
+
+	Color BMP::Lerp(Color c1, Color c2, float t)const
+	{
+		Color res;
+
+		res.r = c1.r + (c2.r - c1.r) * t;
+		res.g = c1.g + (c2.g - c1.g) * t;
+		res.b = c1.b + (c2.b - c1.b) * t;
+
+		return res;
+	}
+
+	Color BMP::Sampler(float u, float v, float mipmapLevel)const
+	{
+		int lv = (int)mipmapLevel;
+
+		int width;
+		int height;
+
+		this->GetResolution(lv, width, height);
+
+		float ux = (u * width - 0.5f);
+		float uy = (v * height - 0.5f);
+
+		int x = (int)ux % width;
+		int y = (int)uy % height;
+		x = x < 0 ? width + x : x;
+		y = y < 0 ? height + y : y;
+
+		int x1 = glm::min(x + 1, width - 1);
+		int x2 = x;
+		int x3 = glm::min(x + 1, width - 1);
+
+		int y1 = y;
+		int y2 = glm::min(y + 1, height - 1);
+		int y3 = glm::min(y + 1, height - 1);
+
+
+		Color c0 = GetColorAt(x, y, lv);
+		Color c1 = GetColorAt(x1, y1, lv);
+		Color c2 = GetColorAt(x2, y2, lv);
+		Color c3 = GetColorAt(x3, y3, lv);
+
+
+		float ht = glm::fract(ux);
+		float vt = glm::fract(uy);
+
+		auto ch1 = Lerp(c0, c1, ht);
+		auto ch2 = Lerp(c2, c3, ht);
+
+		return Lerp(ch1, ch2, vt);
 	}
 
 	Color::Color():Color(0,0,0)
