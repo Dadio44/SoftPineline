@@ -81,53 +81,57 @@ bool Render::AllVertexsInside(const std::vector<VertexOutPut> input)
 }
 
 //输入 三个顶点 输出 裁剪后的顶点组
-std::vector<VertexOutPut> Render::SutherlandHodgeman(
+void Render::SutherlandHodgeman(
 	const VertexOutPut& v1,
 	const VertexOutPut& v2, 
 	const VertexOutPut& v3) {
-	std::vector<VertexOutPut> output = { v1,v2,v3 };
-	if (AllVertexsInside(output)) {
-		return output;
+	
+	_cullResBuf.push_back(v1);
+	_cullResBuf.push_back(v2);
+	_cullResBuf.push_back(v3);
+
+	if (AllVertexsInside(_cullResBuf)) {
+		return ;
 	}
 	for (int i = 0; i < _ViewLines.size(); i++) {
-		std::vector<VertexOutPut> input(output);
-		output.clear();
+		std::vector<VertexOutPut> input(_cullResBuf);
+		_cullResBuf.clear();
 		for (int j = 0; j < input.size(); j++) {
 			VertexOutPut current = input[j];
 			VertexOutPut last = input[(j + input.size() - 1) % input.size()];
 			if (Inside(_ViewLines[i], current.sv_position)) {
 				if (!Inside(_ViewLines[i], last.sv_position)) {
 					VertexOutPut intersecting = Intersect(last, current, _ViewLines[i]);
-					output.push_back(intersecting);
+					_cullResBuf.push_back(intersecting);
 				}
-				output.push_back(current);
+				_cullResBuf.push_back(current);
 			}
 			else if (Inside(_ViewLines[i], last.sv_position)) {
 				VertexOutPut intersecting = Intersect(last, current, _ViewLines[i]);
-				output.push_back(intersecting);
+				_cullResBuf.push_back(intersecting);
 			}
 		}
 	}
-	return output;
 }
 
 void Render::Rasterize(const std::vector<VertexOutPut>& vsOutput, int verticesCount)
 {
 	for (int i = 0; i < verticesCount; i += 3)
 	{
-		auto cullRes = SutherlandHodgeman(
+		_cullResBuf.clear();
+		SutherlandHodgeman(
 			_vsout[i],
 			_vsout[i + 1],
 			_vsout[i + 2]);
 
-		int cnt = cullRes.size();
+		int cnt = _cullResBuf.size();
 
 		for (int j = 2; j < cnt; j++)
 		{
 			DrawTriangle(
-				GetRasterOutput(cullRes[0]),
-				GetRasterOutput(cullRes[j - 1]),
-				GetRasterOutput(cullRes[j]));
+				GetRasterOutput(_cullResBuf[0]),
+				GetRasterOutput(_cullResBuf[j - 1]),
+				GetRasterOutput(_cullResBuf[j]));
 		}
 	}
 

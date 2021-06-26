@@ -27,11 +27,12 @@ private:
 	//减少频繁构造,只增不减
 	std::vector<VertexInput> _vsInput;
 	std::vector<VertexOutPut> _vsout;
+	std::vector<VertexOutPut> _cullResBuf;
 
 	bool Inside(const glm::vec4& line, const glm::vec4& p);
 	VertexOutPut Intersect(const VertexOutPut& v1, const VertexOutPut& v2, const glm::vec4& line);
 	bool AllVertexsInside(const std::vector<VertexOutPut> input);
-	std::vector<VertexOutPut> SutherlandHodgeman(const VertexOutPut& v1, const VertexOutPut& v2, const VertexOutPut& v3);
+	void SutherlandHodgeman(const VertexOutPut& v1, const VertexOutPut& v2, const VertexOutPut& v3);
 
 	static std::vector<glm::vec4> _ViewLines;
 
