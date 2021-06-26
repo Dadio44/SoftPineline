@@ -11,7 +11,10 @@ class UnlitMaterial :
 {
 public:
     // Í¨¹ý IMaterial ¼Ì³Ð
-    virtual void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOutPut>& vsOutput)const override;
+    virtual void VertexShader(
+        const std::vector<VertexInput>& vsInput, 
+        std::vector<VertexOutPut>& vsOutput,
+        int verticesCount)const override;
     virtual Color PixelShader(const RasterOutput& pixelInput, const RasterOutput& dx, const RasterOutput& dy)const override;
 
     UnlitMaterial(BMP::BMP* tex,glm::vec3 pos,int width,int height) 

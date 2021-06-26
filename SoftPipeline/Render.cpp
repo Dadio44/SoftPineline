@@ -23,11 +23,9 @@ void Render::GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput)
 	}
 }
 
-void Render::Rasterize(const std::vector<VertexOutPut>& vsOutput)
+void Render::Rasterize(const std::vector<VertexOutPut>& vsOutput, int verticesCount)
 {
-	int size = vsOutput.size();
-
-	for (int i = 0; i < size; i += 3)
+	for (int i = 0; i < verticesCount; i += 3)
 	{
 		DrawTriangle(
 			GetRasterOutput(vsOutput[i]),
@@ -292,16 +290,21 @@ void Render::SetShader(const IVertexShader* vs, const IPixelShader* ps)
 
 void Render::Draw(const Mesh& mesh)
 {
-	std::vector<VertexInput> vsInput(mesh.GetIndicesCount());
+	auto verticesCount = mesh.GetIndicesCount();
 
-	GetVsInputs(mesh, vsInput);
+	if (_vsInput.size() < verticesCount)
+		_vsInput.resize(verticesCount);
+	
+	GetVsInputs(mesh, _vsInput);
 
-	std::vector<VertexOutPut> vsOutput(vsInput.size());
-	_vs->VertexShader(vsInput, vsOutput);
+	if (_vsout.size() < verticesCount)
+		_vsout.resize(verticesCount);
+	
+	_vs->VertexShader(_vsInput, _vsout, verticesCount);
 	//texture.ReadFrom(texturePath);
 	//texture.GenerateMipMap();
 	//std::string mipmapPath(texturePath);
 	//texture.writeMipMapImage(mipmapPath.replace(mipmapPath.find(".bmp"),4, "_mipmap.bmp").c_str());
 
-	Rasterize(vsOutput);
+	Rasterize(_vsout, verticesCount);
 }

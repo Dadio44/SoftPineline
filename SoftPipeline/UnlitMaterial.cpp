@@ -1,7 +1,10 @@
 #include "UnlitMaterial.h"
 
 
-void UnlitMaterial::VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOutPut>& vsOutput)const
+void UnlitMaterial::VertexShader(
+	const std::vector<VertexInput>& vsInput, 
+	std::vector<VertexOutPut>& vsOutput,
+	int verticesCount)const
 {
 	glm::mat4x4 model = glm::mat4x4(1);
 	model = glm::translate(model, _currentPos);
@@ -13,9 +16,7 @@ void UnlitMaterial::VertexShader(const std::vector<VertexInput>& vsInput, std::v
 
 	glm::mat4x4 vp = projection * view;
 
-	int cnt = vsInput.size();
-
-	for (int i = 0; i < cnt; i++)
+	for (int i = 0; i < verticesCount; i++)
 	{
 		vsOutput[i].position = model * vsInput[i].position;
 		vsOutput[i].normal = model * vsInput[i].normal;

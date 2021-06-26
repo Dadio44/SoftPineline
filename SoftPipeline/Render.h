@@ -24,12 +24,14 @@ private:
 
 	const IVertexShader* _vs;
 	const IPixelShader* _ps;
-
+	//减少频繁构造,只增不减
+	std::vector<VertexInput> _vsInput;
+	std::vector<VertexOutPut> _vsout;
 public:
 	
 
 	void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
-	void Rasterize(const std::vector<VertexOutPut>& vsOutput);
+	void Rasterize(const std::vector<VertexOutPut>& vsOutput,int verticesCount);
 	void DrawTriangle(
 		const RasterOutput& v1,
 		const RasterOutput& v2,
