@@ -207,11 +207,12 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 
 	float square = f01 + f02 + f03;
 
-	//面积小于等于0，丢弃
-	if (square <= 0)
+	//面积等于0，丢弃
+	if (square == 0)
 	{
 		return;
 	}
+
 
 	float oneDevidesquare = 1.0f / square;
 
@@ -228,7 +229,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 		for (int x = minX; x <= maxX; x++)
 		{
 			int srcPosIndex = x + y * _width;
-			if ((cx1 >= 0 && cx2 >= 0 && cx3 >= 0))
+			if ((cx1 >= 0 && cx2 >= 0 && cx3 >= 0) || (cx1 <= 0 && cx2 <= 0 && cx3 <= 0))
 			{
 				rasterOutBuffer[srcPosIndex] = GetInterpolationValue(v1, v2, v3, cx2 * oneDevidesquare, cx3 * oneDevidesquare, cx1 * oneDevidesquare, x, y);
 			}
