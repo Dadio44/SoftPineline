@@ -11,6 +11,7 @@ class SimpleLitMaterail :
     public IModelProp,
     public IVPProp
 {
+public:
     // Í¨¹ý IMaterial ¼Ì³Ð
     virtual void VertexShader(
         const std::vector<VertexInput>& vsInput,

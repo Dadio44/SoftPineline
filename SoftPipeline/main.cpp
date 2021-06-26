@@ -9,13 +9,43 @@
 #include "MeshManager.h"
 #include "BMPManager.h"
 #include "Model.h"
-#include "UnlitMaterial.h"
 #include "Camera.h"
+
+#include "UnlitMaterial.h"
+#include "SimpleLitMaterail.h"
 
 const int SRC_WIDTH = 1920;
 const int SRC_HEIGHT = 1080;
 
 using namespace ResourceManager;
+
+void RenderBox(
+	Render& render,
+	const Camera& cam,
+	std::shared_ptr<MeshManager>& meshManager)
+{
+	glm::mat4x4 model = glm::mat4x4(1);
+	model = glm::translate(model, glm::vec3(0));
+
+	model = glm::rotate(model,glm::radians(45.0f), glm::vec3(0, 1, 0));
+	model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1, 0, 0));
+
+	Model box(model);
+
+	std::vector<std::string> meshs;
+	meshs.push_back("Cube.obj");
+	
+	box.LoadMeshes(meshManager, meshs);
+
+	std::vector<IMaterial*> materials;
+
+	auto mat = new SimpleLitMaterail(Color::red);
+	mat->SetViewProjection(cam.GetView(), cam.GetProjection());
+	materials.push_back(mat);
+
+	box.SetMaterials(materials);
+	box.Render(render);	
+}
 
 void RenderHero(
 	Render& render, 
@@ -76,8 +106,11 @@ int main()
 	Render render;
 	render.Init(SRC_WIDTH, SRC_HEIGHT);
 
-	RenderHero(render, camera, meshManager, bmpManager);
-
+	//RenderHero(render, camera, meshManager, bmpManager);
+	
+	RenderBox(render, camera, meshManager);
+	
+	
 	render.output();
 
 	//system("pause");

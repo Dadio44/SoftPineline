@@ -13,5 +13,8 @@ void SimpleLitMaterail::VertexShader(const std::vector<VertexInput>& vsInput, st
 
 Color SimpleLitMaterail::PixelShader(const RasterOutput& pixelInput, const RasterOutput& dx, const RasterOutput& dy) const
 {
-    return _color;
+	glm::vec4 lightDir(-1, 1, 0,0);
+
+    return _color.multiply(0.5f).
+		add(_color.multiply(glm::max(0.0f,glm::dot(lightDir,pixelInput.normal))));
 }
