@@ -5,6 +5,8 @@
 #include "Render.h"
 #include <memory>
 #include "IMaterial.h"
+#include "glm/glm.hpp"
+#include "IModelProp.h"
 
 class Model
 {
@@ -24,6 +26,16 @@ public:
 	void SetMaterials(const std::vector<IMaterial*> mats)
 	{
 		_materials = mats;
+		
+		IModelProp* im;
+		for (auto m : _materials)
+		{
+			im = dynamic_cast<IModelProp*>(m);
+			if (im != nullptr)
+			{
+				im->SetModel(_model);
+			}
+		}
 	}
 
 
@@ -42,6 +54,10 @@ public:
 		}
 	}
 
+	Model(glm::mat4x4 model):_model(model)
+	{
+
+	}
 
 	~Model()
 	{
@@ -52,8 +68,10 @@ public:
 	}
 
 private:
+	Model() {}
 	std::vector<IMaterial*> _materials;
 	std::vector<ResourceManager::ResHandler> _meshes;
 	std::shared_ptr<ResourceManager::MeshManager> _meshManager;
+	glm::mat4x4 _model;
 };
 

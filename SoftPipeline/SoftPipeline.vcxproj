@@ -154,28 +154,34 @@
   <ItemGroup>
     <ClCompile Include="BMP.cpp" />
     <ClCompile Include="BMPManager.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Render.cpp" />
+    <ClCompile Include="SimpleLitMaterail.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="UnlitMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BMP.h" />
     <ClInclude Include="BMPManager.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="IMaterial.h" />
+    <ClInclude Include="IModelProp.h" />
     <ClInclude Include="IPixelShader.h" />
     <ClInclude Include="IVertexShader.h" />
+    <ClInclude Include="IVPProp.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="IResouceManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="RasterOutput.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="SimpleLitMaterail.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="UnlitMaterial.h" />
     <ClInclude Include="VertexInput.h" />

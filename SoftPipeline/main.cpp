@@ -10,6 +10,7 @@
 #include "BMPManager.h"
 #include "Model.h"
 #include "UnlitMaterial.h"
+#include "Camera.h"
 
 const int SRC_WIDTH = 1920;
 const int SRC_HEIGHT = 1080;
@@ -18,10 +19,21 @@ using namespace ResourceManager;
 
 void RenderHero(
 	Render& render, 
+	const Camera& cam,
 	std::shared_ptr<MeshManager>& meshManager,
 	std::shared_ptr<BMPManager>& bmpManager)
 {
-	Model hero;
+	glm::vec3 offset(3.679, 2.5, -1.1434);
+
+	glm::vec3 pos = glm::vec3(0) - offset;
+
+	glm::mat4x4 model = glm::mat4x4(1);
+	model = glm::translate(model, pos);
+
+	//model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
+	//model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
+
+	Model hero(model);
 
 	std::vector<std::string> meshs;
 	meshs.push_back("Hair009.obj");
@@ -35,20 +47,15 @@ void RenderHero(
 	textures.push_back("Body.bmp");
 	textures.push_back("Face.bmp");
 
-	glm::vec3 offset(3.679, 2.5, -1.1434);
-
-	glm::vec3 pos = glm::vec3(0) - offset;
-
 	std::vector<IMaterial*> materials;
 
 	for (auto path : textures)
 	{
 		auto id = bmpManager->Load(path);
-		materials.push_back(new UnlitMaterial(
-			bmpManager->Get(id),
-			pos,
-			SRC_WIDTH,
-			SRC_HEIGHT));
+		auto mat = new UnlitMaterial(
+			bmpManager->Get(id));
+		mat->SetViewProjection(cam.GetView(), cam.GetProjection());
+		materials.push_back(mat);
 	}
 
 	hero.SetMaterials(materials);
@@ -60,10 +67,16 @@ int main()
 	std::shared_ptr<MeshManager> meshManager = std::make_shared<MeshManager>();
 	std::shared_ptr<BMPManager> bmpManager = std::make_shared<BMPManager>();
 
+	Camera camera;
+
+	camera.SetPos(glm::vec3(0, 0, 2.5f));
+	camera.SetTarget(glm::vec3(0));
+	camera.SetPerspective(glm::radians(60.0f), (float)SRC_WIDTH / SRC_HEIGHT, 0.3f, 100.0f);
+
 	Render render;
 	render.Init(SRC_WIDTH, SRC_HEIGHT);
 
-	RenderHero(render, meshManager, bmpManager);
+	RenderHero(render, camera, meshManager, bmpManager);
 
 	render.output();
 

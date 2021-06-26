@@ -1,7 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
 #pragma once
-#include "glm/glm.hpp"
-
 class Mesh
 {
 public :

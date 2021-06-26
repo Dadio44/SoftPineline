@@ -19,53 +19,65 @@
     <Filter Include="Header Files\Render">
       <UniqueIdentifier>{b6fe11ee-a821-411b-b524-e8b837b7b265}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Materials">
+    <Filter Include="Header Files\Engine">
+      <UniqueIdentifier>{b1337e7a-098b-4173-a519-653805ef618d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render">
+      <UniqueIdentifier>{bca402e3-4b29-4d92-84cb-938050f6979e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ResourceManager">
+      <UniqueIdentifier>{7fe337c5-0655-4e44-b448-f88a1b758c06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine">
+      <UniqueIdentifier>{a16d5653-cd9f-4d57-aafa-9a8fb8ca36a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Materials">
       <UniqueIdentifier>{19456b58-ceee-420d-a6af-33f7d19798c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Materials">
+      <UniqueIdentifier>{71449b57-d488-4f93-b040-e5fd582d874d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BMP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MeshManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BMPManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="SimpleLitMaterail.cpp">
+      <Filter>Source Files\Engine\Materials</Filter>
     </ClCompile>
     <ClCompile Include="UnlitMaterial.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Engine\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="BMP.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="BMPManager.cpp">
+      <Filter>Source Files\ResourceManager</Filter>
     </ClCompile>
     <ClCompile Include="Color.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshManager.cpp">
+      <Filter>Source Files\ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="test.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BMP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BMPManager.h">
@@ -89,20 +101,41 @@
     <ClInclude Include="VertexOutPut.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
-    <ClInclude Include="IVertexShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IPixelShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IMaterial.h">
-      <Filter>Header Files\Materials</Filter>
+      <Filter>Header Files\Engine\Materials</Filter>
     </ClInclude>
     <ClInclude Include="UnlitMaterial.h">
-      <Filter>Header Files\Materials</Filter>
+      <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleLitMaterail.h">
+      <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="IModelProp.h">
+      <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="IVPProp.h">
+      <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="BMP.h">
+      <Filter>Header Files\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Color.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="IPixelShader.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="IVertexShader.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Engine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
