@@ -22,13 +22,14 @@ using namespace ResourceManager;
 void RenderBox(
 	Render& render,
 	const Camera& cam,
-	std::shared_ptr<MeshManager>& meshManager)
+	std::shared_ptr<MeshManager>& meshManager,
+	std::shared_ptr<BMPManager>& bmpManager)
 {
 	glm::mat4x4 model = glm::mat4x4(1);
 	model = glm::translate(model, glm::vec3(0));
 
-	model = glm::rotate(model,glm::radians(45.0f), glm::vec3(0, 1, 0));
-	model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1, 0, 0));
+	//model = glm::rotate(model,glm::radians(45.0f), glm::vec3(0, 1, 0));
+	//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1, 0, 0));
 
 	Model box(model);
 
@@ -39,8 +40,14 @@ void RenderBox(
 
 	std::vector<IMaterial*> materials;
 
-	auto mat = new SimpleLitMaterail(Color::red);
+	auto id = bmpManager->Load("512_UVChecker.bmp");
+	auto mat = new UnlitMaterial(
+		bmpManager->Get(id));
 	mat->SetViewProjection(cam.GetView(), cam.GetProjection());
+
+	/*auto mat = new SimpleLitMaterail(Color::red);
+	mat->SetViewProjection(cam.GetView(), cam.GetProjection());
+	*/
 	materials.push_back(mat);
 
 	box.SetMaterials(materials);
@@ -99,7 +106,9 @@ int main()
 
 	Camera camera;
 
-	camera.SetPos(glm::vec3(0, 0, 2.5f));
+	//camera.SetPos(glm::vec3(0.4f, 0.4f, 0.4f));
+	camera.SetPos(glm::vec3(0.6f, 0.6f, 0.6f));
+	//camera.SetPos(glm::vec3(1.0f, 1.0f, 1.0f));
 	camera.SetTarget(glm::vec3(0));
 	camera.SetPerspective(glm::radians(60.0f), (float)SRC_WIDTH / SRC_HEIGHT, 0.3f, 100.0f);
 
@@ -108,7 +117,7 @@ int main()
 
 	//RenderHero(render, camera, meshManager, bmpManager);
 	
-	RenderBox(render, camera, meshManager);
+	RenderBox(render, camera, meshManager,bmpManager);
 	
 	
 	render.output();

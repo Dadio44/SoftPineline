@@ -23,14 +23,112 @@ void Render::GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput)
 	}
 }
 
+const std::vector<glm::vec4> ViewLines = {
+	//Near
+	glm::vec4(0,0,1,1),
+	//far
+	glm::vec4(0,0,-1,1),
+	//left
+	glm::vec4(1,0,0,1),
+	//top
+	glm::vec4(0,1,0,1),
+	//right
+	glm::vec4(-1,0,0,1),
+	//bottom 
+	glm::vec4(0,-1,0,1)
+};
+
+bool Inside(const glm::vec4& line, const glm::vec4& p) {
+	return line.x * p.x + line.y * p.y + line.z * p.z + line.w * p.w >= 0;
+}
+
+//交点，通过端点插值
+VertexOutPut Intersect(
+	const VertexOutPut& v1, 
+	const VertexOutPut& v2, 
+	const glm::vec4& line) {
+	
+	float da = 
+		v1.sv_position.x * line.x + 
+		v1.sv_position.y * line.y + 
+		v1.sv_position.z * line.z + 
+		line.w * v1.sv_position.w;
+	float db = 
+		v2.sv_position.x * line.x + 
+		v2.sv_position.y * line.y + 
+		v2.sv_position.z * line.z + 
+		line.w * v2.sv_position.w;
+
+	float weight = da / (da - db);
+	return VertexOutPut::lerp(v1, v2, weight);
+}
+
+bool AllVertexsInside(const std::vector<VertexOutPut> input)
+{
+	for (int i = 0; i < ViewLines.size(); i++) 
+	{
+		for (int j = 0; j < input.size(); j++) 
+		{
+			if (!Inside(ViewLines[i], input[j].sv_position))
+			{
+				return false;
+			}
+		}
+
+	}
+
+	return true;
+}
+
+//输入 三个顶点 输出 裁剪后的顶点组
+std::vector<VertexOutPut> SutherlandHodgeman(
+	const VertexOutPut& v1,
+	const VertexOutPut& v2, 
+	const VertexOutPut& v3) {
+	std::vector<VertexOutPut> output = { v1,v2,v3 };
+	if (AllVertexsInside(output)) {
+		return output;
+	}
+	for (int i = 0; i < ViewLines.size(); i++) {
+		std::vector<VertexOutPut> input(output);
+		output.clear();
+		for (int j = 0; j < input.size(); j++) {
+			VertexOutPut current = input[j];
+			VertexOutPut last = input[(j + input.size() - 1) % input.size()];
+			if (Inside(ViewLines[i], current.sv_position)) {
+				if (!Inside(ViewLines[i], last.sv_position)) {
+					VertexOutPut intersecting = Intersect(last, current, ViewLines[i]);
+					output.push_back(intersecting);
+				}
+				output.push_back(current);
+			}
+			else if (Inside(ViewLines[i], last.sv_position)) {
+				VertexOutPut intersecting = Intersect(last, current, ViewLines[i]);
+				output.push_back(intersecting);
+			}
+		}
+	}
+	return output;
+}
+
 void Render::Rasterize(const std::vector<VertexOutPut>& vsOutput, int verticesCount)
 {
 	for (int i = 0; i < verticesCount; i += 3)
 	{
-		DrawTriangle(
-			GetRasterOutput(vsOutput[i]),
-			GetRasterOutput(vsOutput[i + 1]),
-			GetRasterOutput(vsOutput[i + 2]));
+		auto cullRes = SutherlandHodgeman(
+			_vsout[i],
+			_vsout[i + 1],
+			_vsout[i + 2]);
+
+		int cnt = cullRes.size();
+
+		for (int j = 2; j < cnt; j++)
+		{
+			DrawTriangle(
+				GetRasterOutput(cullRes[0]),
+				GetRasterOutput(cullRes[j - 1]),
+				GetRasterOutput(cullRes[j]));
+		}
 	}
 
 }
@@ -144,7 +242,6 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 			// 深度测试
 			if (depthBuffer[srcPosIndex] > ro.sv_position.z)
 			{
-
 				preX = srcPosIndex;
 				if (x <= minX)
 				{
@@ -224,6 +321,7 @@ RasterOutput Render::GetInterpolationValue(
 	res.screenPos.x = x;
 	res.screenPos.y = y;
 
+
 	res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
 
 	float sw = 1 / res.sv_position.w;
@@ -236,13 +334,21 @@ RasterOutput Render::GetInterpolationValue(
 	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
 	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w);
 
+
+
+
+	if (res.sv_position.z < -1)
+	{
+		//system("pause");
+	}
+
 	return res;
 }
 
 RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 {
 	RasterOutput rasterOutput;
-
+	//透视除法
 	float invW = 1 / vertex.sv_position.w;
 
 	rasterOutput.sv_position = vertex.sv_position * invW;
@@ -252,6 +358,7 @@ RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 	rasterOutput.uv = vertex.uv * invW;
 	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * (_width - 1);
 	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * (_height - 1);
+
 
 	return rasterOutput;
 }
@@ -307,4 +414,5 @@ void Render::Draw(const Mesh& mesh)
 	//texture.writeMipMapImage(mipmapPath.replace(mipmapPath.find(".bmp"),4, "_mipmap.bmp").c_str());
 
 	Rasterize(_vsout, verticesCount);
+
 }

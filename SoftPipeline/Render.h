@@ -29,7 +29,6 @@ private:
 	std::vector<VertexOutPut> _vsout;
 public:
 	
-
 	void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
 	void Rasterize(const std::vector<VertexOutPut>& vsOutput,int verticesCount);
 	void DrawTriangle(
