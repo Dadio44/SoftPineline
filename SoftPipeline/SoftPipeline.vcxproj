@@ -154,6 +154,7 @@
   <ItemGroup>
     <ClCompile Include="BMP.cpp" />
     <ClCompile Include="BMPManager.cpp" />
+    <ClCompile Include="Color.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -165,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="BMP.h" />
     <ClInclude Include="BMPManager.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="IMaterial.h" />
     <ClInclude Include="IPixelShader.h" />
     <ClInclude Include="IVertexShader.h" />

@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "BMP.h"
 
 class UnlitMaterial :
     public IMaterial
@@ -11,7 +12,7 @@ class UnlitMaterial :
 public:
     // Í¨¹ý IMaterial ¼Ì³Ð
     virtual void VertexShader(const std::vector<VertexInput>& vsInput, std::vector<VertexOutPut>& vsOutput)const override;
-    virtual BMP::Color PixelShader(const RasterOutput& pixelInput, const RasterOutput& dx, const RasterOutput& dy)const override;
+    virtual Color PixelShader(const RasterOutput& pixelInput, const RasterOutput& dx, const RasterOutput& dy)const override;
 
     UnlitMaterial(BMP::BMP* tex,glm::vec3 pos,int width,int height) 
         :_mainTex(tex),

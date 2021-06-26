@@ -24,7 +24,7 @@ void UnlitMaterial::VertexShader(const std::vector<VertexInput>& vsInput, std::v
 	}
 }
 
-BMP::Color UnlitMaterial::PixelShader(const RasterOutput& pixelInput, const RasterOutput& rx, const RasterOutput& ry)const
+Color UnlitMaterial::PixelShader(const RasterOutput& pixelInput, const RasterOutput& rx, const RasterOutput& ry)const
 {
 	glm::vec2 ddx = rx.uv - pixelInput.uv;
 	glm::vec2 ddy = ry.uv - pixelInput.uv;
