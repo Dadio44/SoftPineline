@@ -27,12 +27,13 @@ private:
 	//减少频繁构造,只增不减
 	std::vector<VertexInput> _vsInput;
 	std::vector<VertexOutPut> _vsout;
-	std::vector<VertexOutPut> _cullResBuf;
+	std::vector<VertexOutPut> _cullResBufs[6 + 1];
+	int _curOutputBufIndex;
 
 	bool Inside(const glm::vec4& line, const glm::vec4& p);
 	VertexOutPut Intersect(const VertexOutPut& v1, const VertexOutPut& v2, const glm::vec4& line);
 	bool AllVertexsInside(const std::vector<VertexOutPut> input);
-	void SutherlandHodgeman(const VertexOutPut& v1, const VertexOutPut& v2, const VertexOutPut& v3);
+	int SutherlandHodgeman(const VertexOutPut& v1, const VertexOutPut& v2, const VertexOutPut& v3);
 
 	static std::vector<glm::vec4> _ViewLines;
 
@@ -84,6 +85,12 @@ public:
 	void output()
 	{
 		rt.writeImage();
+	}
+
+	Render()
+	{
+		for(int i = 0;i < 7;i++)
+			_cullResBufs[i].resize(32);
 	}
 
 	~Render()

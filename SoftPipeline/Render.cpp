@@ -81,57 +81,72 @@ bool Render::AllVertexsInside(const std::vector<VertexOutPut> input)
 }
 
 //输入 三个顶点 输出 裁剪后的顶点组
-void Render::SutherlandHodgeman(
+int Render::SutherlandHodgeman(
 	const VertexOutPut& v1,
 	const VertexOutPut& v2, 
 	const VertexOutPut& v3) {
 	
-	_cullResBuf.push_back(v1);
-	_cullResBuf.push_back(v2);
-	_cullResBuf.push_back(v3);
+	int outputSize = 3;
 
-	if (AllVertexsInside(_cullResBuf)) {
-		return ;
+	_curOutputBufIndex = 0;
+	
+
+	_cullResBufs[_curOutputBufIndex][0] = v1;
+	_cullResBufs[_curOutputBufIndex][1] = v2;
+	_cullResBufs[_curOutputBufIndex][2] = v3;
+
+	if (AllVertexsInside(_cullResBufs[_curOutputBufIndex])) {
+		return outputSize;
 	}
+
+	int inputSize = 0;
+
 	for (int i = 0; i < _ViewLines.size(); i++) {
-		std::vector<VertexOutPut> input(_cullResBuf);
-		_cullResBuf.clear();
-		for (int j = 0; j < input.size(); j++) {
+
+		
+		std::vector<VertexOutPut>& input = _cullResBufs[i];
+		inputSize = outputSize;
+
+		_curOutputBufIndex = i + 1;
+		std::vector<VertexOutPut>& output = _cullResBufs[_curOutputBufIndex];
+		outputSize = 0;
+
+		for (int j = 0; j < inputSize; j++) {
 			VertexOutPut current = input[j];
-			VertexOutPut last = input[(j + input.size() - 1) % input.size()];
+			VertexOutPut last = input[(j + inputSize - 1) % inputSize];
 			if (Inside(_ViewLines[i], current.sv_position)) {
 				if (!Inside(_ViewLines[i], last.sv_position)) {
 					VertexOutPut intersecting = Intersect(last, current, _ViewLines[i]);
-					_cullResBuf.push_back(intersecting);
+					output[outputSize++] = intersecting;
 				}
-				_cullResBuf.push_back(current);
+				output[outputSize++] = current;
 			}
 			else if (Inside(_ViewLines[i], last.sv_position)) {
 				VertexOutPut intersecting = Intersect(last, current, _ViewLines[i]);
-				_cullResBuf.push_back(intersecting);
+				output[outputSize++] = intersecting;
 			}
 		}
 	}
+
+	return outputSize;
 }
 
 void Render::Rasterize(const std::vector<VertexOutPut>& vsOutput, int verticesCount)
 {
 	for (int i = 0; i < verticesCount; i += 3)
 	{
-		_cullResBuf.clear();
-		SutherlandHodgeman(
+		int cnt = SutherlandHodgeman(
 			_vsout[i],
 			_vsout[i + 1],
 			_vsout[i + 2]);
 
-		int cnt = _cullResBuf.size();
-
+		//GL_TRIANGLES_FAN方式组装
 		for (int j = 2; j < cnt; j++)
 		{
 			DrawTriangle(
-				GetRasterOutput(_cullResBuf[0]),
-				GetRasterOutput(_cullResBuf[j - 1]),
-				GetRasterOutput(_cullResBuf[j]));
+				GetRasterOutput(_cullResBufs[_curOutputBufIndex][0]),
+				GetRasterOutput(_cullResBufs[_curOutputBufIndex][j - 1]),
+				GetRasterOutput(_cullResBufs[_curOutputBufIndex][j]));
 		}
 	}
 
@@ -337,14 +352,6 @@ RasterOutput Render::GetInterpolationValue(
 	res.position = (v1.position * u + v2.position * v + v3.position * w);
 	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
 	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w);
-
-
-
-
-	if (res.sv_position.z < -1)
-	{
-		//system("pause");
-	}
 
 	return res;
 }
