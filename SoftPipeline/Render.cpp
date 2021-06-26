@@ -91,7 +91,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 	float square = f01 + f02 + f03;
 
 	//面积小于等于0，丢弃
-	if (square == 0)
+	if (square <= 0)
 	{
 		return;
 	}
