@@ -22,3 +22,8 @@ Color UnlitMaterial::PixelShader(const RasterOutput& pixelInput, const RasterOut
 
 	return _mainTex->Sampler(pixelInput.uv.x, pixelInput.uv.y, ddx, ddy);
 }
+
+CullingType UnlitMaterial::GetCullingOption()
+{
+	return CullingType::None;
+}

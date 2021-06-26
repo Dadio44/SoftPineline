@@ -213,6 +213,20 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 		return;
 	}
 
+	switch (_cullingtype)
+	{
+	case CullingType::Back:
+		if (square < 0)
+			return;
+		break;
+	case CullingType::Front:
+		if (square > 0)
+			return;
+		break;
+	case CullingType::None:
+		break;
+	}
+
 
 	float oneDevidesquare = 1.0f / square;
 

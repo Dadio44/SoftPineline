@@ -11,7 +11,8 @@
 class UnlitMaterial :
     public IMaterial, 
     public IModelProp,
-    public IVPProp
+    public IVPProp,
+    ICullOption
 {
 public:
     // 通过 IMaterial 继承
@@ -44,5 +45,8 @@ private:
     glm::mat4x4 _vp;
     glm::mat4x4 _view;
     glm::mat4x4 _projection;
+
+    // 通过 ICullOption 继承
+    virtual CullingType GetCullingOption() override;
 };
 

@@ -12,6 +12,14 @@
 #include "IVertexShader.h"
 #include "IPixelShader.h"
 
+enum CullingType
+{
+	Back,
+	Front,
+	None,
+};
+
+
 class Render
 {
 private:
@@ -37,7 +45,7 @@ private:
 
 	static std::vector<glm::vec4> _ViewLines;
 
-
+	CullingType _cullingtype;
 public:
 	
 	void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
@@ -64,6 +72,11 @@ public:
 	void ClearDepth(float value, float* depthBuffer);
 
 	void SetShader(const IVertexShader* vs, const IPixelShader* ps);
+	void SetCullingOption(CullingType cullingtype)
+	{
+		_cullingtype = cullingtype;
+	}
+
 
 	void Draw(const Mesh& mesh);
 

@@ -75,6 +75,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="IMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="ICullOption.h">
+      <Filter>Header Files\Engine\Materials</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

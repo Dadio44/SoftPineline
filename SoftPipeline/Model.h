@@ -7,6 +7,7 @@
 #include "IMaterial.h"
 #include "glm/glm.hpp"
 #include "IModelProp.h"
+#include "ICullOption.h"
 
 class Model
 {
@@ -46,9 +47,19 @@ public:
 		if (cnt > 0)
 			assert(cnt == _materials.size());
 
+		ICullOption* cullOpt;
+
 		for(int i = 0;i < cnt;i++)
 		{
 			IMaterial* mat = _materials[i];
+
+			cullOpt = dynamic_cast<ICullOption*>(mat);
+
+			if (cullOpt != nullptr)
+			{
+				render.SetCullingOption(cullOpt->GetCullingOption());
+			}
+
 			render.SetShader(mat, mat);
 			render.Draw(*_meshManager->Get(_meshes[i]));
 		}
