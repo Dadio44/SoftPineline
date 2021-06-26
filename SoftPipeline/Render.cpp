@@ -23,7 +23,7 @@ void Render::GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput)
 	}
 }
 
-const std::vector<glm::vec4> ViewLines = {
+std::vector<glm::vec4> Render::_ViewLines = {
 	//Near
 	glm::vec4(0,0,1,1),
 	//far
@@ -38,12 +38,12 @@ const std::vector<glm::vec4> ViewLines = {
 	glm::vec4(0,-1,0,1)
 };
 
-bool Inside(const glm::vec4& line, const glm::vec4& p) {
+bool  Render::Inside(const glm::vec4& line, const glm::vec4& p) {
 	return line.x * p.x + line.y * p.y + line.z * p.z + line.w * p.w >= 0;
 }
 
 //交点，通过端点插值
-VertexOutPut Intersect(
+VertexOutPut  Render::Intersect(
 	const VertexOutPut& v1, 
 	const VertexOutPut& v2, 
 	const glm::vec4& line) {
@@ -63,13 +63,13 @@ VertexOutPut Intersect(
 	return VertexOutPut::lerp(v1, v2, weight);
 }
 
-bool AllVertexsInside(const std::vector<VertexOutPut> input)
+bool Render::AllVertexsInside(const std::vector<VertexOutPut> input)
 {
-	for (int i = 0; i < ViewLines.size(); i++) 
+	for (int i = 0; i < _ViewLines.size(); i++) 
 	{
 		for (int j = 0; j < input.size(); j++) 
 		{
-			if (!Inside(ViewLines[i], input[j].sv_position))
+			if (!Inside(_ViewLines[i], input[j].sv_position))
 			{
 				return false;
 			}
@@ -81,7 +81,7 @@ bool AllVertexsInside(const std::vector<VertexOutPut> input)
 }
 
 //输入 三个顶点 输出 裁剪后的顶点组
-std::vector<VertexOutPut> SutherlandHodgeman(
+std::vector<VertexOutPut> Render::SutherlandHodgeman(
 	const VertexOutPut& v1,
 	const VertexOutPut& v2, 
 	const VertexOutPut& v3) {
@@ -89,21 +89,21 @@ std::vector<VertexOutPut> SutherlandHodgeman(
 	if (AllVertexsInside(output)) {
 		return output;
 	}
-	for (int i = 0; i < ViewLines.size(); i++) {
+	for (int i = 0; i < _ViewLines.size(); i++) {
 		std::vector<VertexOutPut> input(output);
 		output.clear();
 		for (int j = 0; j < input.size(); j++) {
 			VertexOutPut current = input[j];
 			VertexOutPut last = input[(j + input.size() - 1) % input.size()];
-			if (Inside(ViewLines[i], current.sv_position)) {
-				if (!Inside(ViewLines[i], last.sv_position)) {
-					VertexOutPut intersecting = Intersect(last, current, ViewLines[i]);
+			if (Inside(_ViewLines[i], current.sv_position)) {
+				if (!Inside(_ViewLines[i], last.sv_position)) {
+					VertexOutPut intersecting = Intersect(last, current, _ViewLines[i]);
 					output.push_back(intersecting);
 				}
 				output.push_back(current);
 			}
-			else if (Inside(ViewLines[i], last.sv_position)) {
-				VertexOutPut intersecting = Intersect(last, current, ViewLines[i]);
+			else if (Inside(_ViewLines[i], last.sv_position)) {
+				VertexOutPut intersecting = Intersect(last, current, _ViewLines[i]);
 				output.push_back(intersecting);
 			}
 		}
