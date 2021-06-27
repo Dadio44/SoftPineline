@@ -337,7 +337,20 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 
 void Render::DrawPixel(const RasterOutput& v, const RasterOutput& dx, const RasterOutput& dy)
 {
-	rt.drawPixelAt(_ps->PixelShader(v,dx,dy), v.screenPos.x, v.screenPos.y);
+	auto color = _ps->PixelShader(v, dx, dy);
+	if (_enabledBlend)
+	{
+		Color dstCol;
+		rt.GetColorAt(v.screenPos.x, v.screenPos.y, &dstCol);
+		
+		auto blendCol = color.multiply(color.a).add(dstCol.multiply(1 - color.a));
+	
+		rt.drawPixelAt(blendCol, v.screenPos.x, v.screenPos.y);
+	}
+	else
+	{
+		rt.drawPixelAt(color, v.screenPos.x, v.screenPos.y);
+	}
 }
 
 RasterOutput Render::GetInterpolationValue(

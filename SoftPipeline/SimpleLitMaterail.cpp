@@ -22,6 +22,11 @@ Color SimpleLitMaterail::PixelShader(const RasterOutput& pixelInput, const Raste
 	//auto normal = glm::normalize(pixelInput.normal);
 
 	//return Color(normal.x, normal.y, normal.z);
-    return _color.multiply(0.5f).
-		add(_color.multiply(glm::max(0.0f,glm::dot(lightDir,pixelInput.normal))));
+
+	auto res = _color.multiply(0.5f).
+		add(_color.multiply(glm::max(0.0f, glm::dot(lightDir, pixelInput.normal))));
+
+	res.a = _color.a;
+
+	return res;
 }

@@ -1,5 +1,5 @@
 #include "Color.h"
-
+#include <cstdlib>
 Color Color::black(0, 0, 0);
 Color Color::white(1, 1, 1);
 Color Color::red(1, 0, 0);
@@ -10,14 +10,27 @@ Color::Color() :Color(0, 0, 0)
 {
 }
 
-Color::Color(float r, float g, float b) : r(r), g(g), b(b)
+Color::Color(float r, float g, float b) : r(r), g(g), b(b),a(1)
+{
+}
+
+Color::Color(float r, float g, float b,float a) : r(r), g(g), b(b), a(a)
 {
 }
 
 
-Color::Color(const Color& color) : Color(color.r, color.g, color.b)
+Color::Color(const Color& color) : Color(color.r, color.g, color.b, color.a)
 {
 
+}
+
+Color Color::Random()
+{
+	float base = 1.0 / 255.f;
+	auto r = (rand() % 255);
+	auto g = (rand() % 255);
+	auto b = (rand() % 255);
+	return Color(r * base,g * base,b * base);
 }
 
 Color Color::add(const Color& color)const

@@ -171,6 +171,7 @@
     <ClInclude Include="BMPManager.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="IBlendOption.h" />
     <ClInclude Include="ICullOption.h" />
     <ClInclude Include="IMaterial.h" />
     <ClInclude Include="IModelProp.h" />

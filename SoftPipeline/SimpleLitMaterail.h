@@ -36,6 +36,11 @@ public:
 
     }
 
+    virtual bool GetBlendOption() override
+    {
+        return true;
+    }
+
 private :
     Color _color;
     glm::mat4x4 _model;

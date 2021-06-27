@@ -48,6 +48,7 @@ public:
 			assert(cnt == _materials.size());
 
 		ICullOption* cullOpt;
+		IBlendOption* blendOpt;
 
 		for(int i = 0;i < cnt;i++)
 		{
@@ -58,6 +59,21 @@ public:
 			if (cullOpt != nullptr)
 			{
 				render.SetCullingOption(cullOpt->GetCullingOption());
+			}
+			else
+			{
+				render.SetCullingOption(CullingType::Back);
+			}
+
+			blendOpt = dynamic_cast<IBlendOption*>(mat);
+
+			if (blendOpt != nullptr)
+			{
+				render.SetBlendOption(blendOpt->GetBlendOption());
+			}
+			else
+			{
+				render.SetBlendOption(false);
 			}
 
 			render.SetShader(mat, mat);

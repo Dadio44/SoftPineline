@@ -54,6 +54,59 @@ void RenderBox(
 	box.Render(render);	
 }
 
+void RenderShaderBall(
+	Render& render,
+	const Camera& cam,
+	std::shared_ptr<MeshManager>& meshManager,
+	std::shared_ptr<BMPManager>& bmpManager)
+{
+	glm::mat4x4 model = glm::mat4x4(1);
+	model = glm::translate(model, glm::vec3(0));
+
+	//model = glm::rotate(model,glm::radians(45.0f), glm::vec3(0, 1, 0));
+	//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1, 0, 0));
+
+	Model box(model);
+
+	std::vector<std::string> meshs;
+	meshs.push_back("Cushion.obj");
+	meshs.push_back("GrayBackground.obj");
+	meshs.push_back("GrayInlay.obj");
+	meshs.push_back("MaterialBase.obj");
+	meshs.push_back("MaterialBaseInside.obj");
+	meshs.push_back("MaterialSphere.obj");
+	
+
+	box.LoadMeshes(meshManager, meshs);
+
+	std::vector<IMaterial*> materials;
+
+	//auto id = bmpManager->Load("512_UVChecker.bmp");
+	//auto mat = new UnlitMaterial(
+	//	bmpManager->Get(id));
+	//mat->SetViewProjection(cam.GetView(), cam.GetProjection());
+
+	srand(0);
+
+	for (int i = 0; i < 6; i++)
+	{
+		auto col = Color::Random();
+
+		if (i == 5)
+		{
+			col.a = 0.5f;
+		}
+
+		auto mat = new SimpleLitMaterail(col);
+		mat->SetViewProjection(cam.GetView(), cam.GetProjection());
+		materials.push_back(mat);
+	}
+
+
+	box.SetMaterials(materials);
+	box.Render(render);
+}
+
 void RenderHero(
 	Render& render, 
 	const Camera& cam,
@@ -106,9 +159,9 @@ int main()
 
 	Camera camera;
 
-	//camera.SetPos(glm::vec3(0.4f, 0.4f, 0.4f));
-	camera.SetPos(glm::vec3(0.6f, 0.6f, 0.6f));
-	//camera.SetPos(glm::vec3(1.0f, 1.0f, 1.0f));
+	//camera.SetPos(glm::vec3(0.6f, 0.6f, 0.6f));
+	
+	camera.SetPos(glm::vec3(0.0f, 2.0f, -2.0f));
 	camera.SetTarget(glm::vec3(0));
 	camera.SetPerspective(glm::radians(60.0f), (float)SRC_WIDTH / SRC_HEIGHT, 0.3f, 100.0f);
 
@@ -117,8 +170,9 @@ int main()
 
 	//RenderHero(render, camera, meshManager, bmpManager);
 	
-	RenderBox(render, camera, meshManager,bmpManager);
+	//RenderBox(render, camera, meshManager,bmpManager);
 	
+	RenderShaderBall(render, camera, meshManager, bmpManager);
 	
 	render.output();
 

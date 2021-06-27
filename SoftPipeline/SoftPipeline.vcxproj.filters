@@ -143,5 +143,8 @@
     <ClInclude Include="ICullOption.h">
       <Filter>Header Files\Engine\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="IBlendOption.h">
+      <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

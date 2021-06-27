@@ -46,6 +46,7 @@ private:
 	static std::vector<glm::vec4> _ViewLines;
 
 	CullingType _cullingtype;
+	bool _enabledBlend;
 public:
 	
 	void GetVsInputs(const Mesh& mesh, std::vector<VertexInput>& vsInput);
@@ -75,6 +76,11 @@ public:
 	void SetCullingOption(CullingType cullingtype)
 	{
 		_cullingtype = cullingtype;
+	}
+
+	void SetBlendOption(bool enabledBlend)
+	{
+		_enabledBlend = enabledBlend;
 	}
 
 
