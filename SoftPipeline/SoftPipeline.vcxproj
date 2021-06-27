@@ -156,6 +156,7 @@
     <ClCompile Include="BMPManager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="IMaterial.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="BMPManager.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="CubeMap.h" />
     <ClInclude Include="IBlendOption.h" />
     <ClInclude Include="ICullOption.h" />
     <ClInclude Include="IMaterial.h" />
