@@ -11,8 +11,7 @@
 class UnlitMaterial :
     public IMaterial, 
     public IModelProp,
-    public IVPProp,
-    ICullOption
+    public IVPProp
 {
 public:
     // Í¨¹ý IMaterial ¼Ì³Ð

@@ -164,6 +164,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="SimpleLitMaterail.cpp" />
+    <ClCompile Include="SkyBoxMaterial.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="UnlitMaterial.cpp" />
   </ItemGroup>
@@ -187,6 +188,7 @@
     <ClInclude Include="RasterOutput.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="SimpleLitMaterail.h" />
+    <ClInclude Include="SkyBoxMaterial.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="UnlitMaterial.h" />
     <ClInclude Include="VertexInput.h" />

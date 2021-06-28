@@ -98,7 +98,7 @@ public:
 
 		rt.SetOutPut("renderTarget.bmp", _width, _height);
 		ClearColor(rt);
-		ClearDepth(1, depthBuffer);
+		ClearDepth(2, depthBuffer);
 	}
 
 	void output()

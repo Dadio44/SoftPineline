@@ -81,6 +81,9 @@
     <ClCompile Include="CubeMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SkyBoxMaterial.cpp">
+      <Filter>Source Files\Engine\Materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test.h">
@@ -151,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="CubeMap.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyBoxMaterial.h">
+      <Filter>Header Files\Engine\Materials</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

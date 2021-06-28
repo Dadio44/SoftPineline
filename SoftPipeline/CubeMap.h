@@ -11,7 +11,6 @@ enum CubeMapTexDiretcion
 	NEGATIVE_Y,
 	POSITIVE_Z,
 	NEGATIVE_Z,
-	None,
 };
 
 

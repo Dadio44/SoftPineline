@@ -10,9 +10,11 @@
 #include "BMPManager.h"
 #include "Model.h"
 #include "Camera.h"
+#include "CubeMap.h"
 
 #include "UnlitMaterial.h"
 #include "SimpleLitMaterail.h"
+#include "SkyBoxMaterial.h"
 
 const int SRC_WIDTH = 1920;
 const int SRC_HEIGHT = 1080;
@@ -152,6 +154,43 @@ void RenderHero(
 	hero.Render(render);
 }
 
+void RenderSkyBox(Render& render,
+	const Camera& cam,
+	std::shared_ptr<MeshManager>& meshManager)
+{
+	glm::mat4x4 model = glm::mat4x4(1);
+	model = glm::translate(model, glm::vec3(0));
+
+	Model box(model);
+
+	std::vector<std::string> meshs;
+	meshs.push_back("Cube.obj");
+
+	box.LoadMeshes(meshManager, meshs);
+
+	std::vector<IMaterial*> materials;
+
+	std::vector<std::string> faces
+	{
+		"right.bmp",
+		"left.bmp",
+		"top.bmp",
+		"bottom.bmp",
+		"front.bmp",
+		"back.bmp"
+	};
+
+	CubeMap* cubeMap = new CubeMap();
+	cubeMap->Load(faces);
+
+	auto mat = new SkyBoxMaterial(cubeMap);
+	mat->SetViewProjection(cam.GetView(), cam.GetProjection());
+	materials.push_back(mat);
+
+	box.SetMaterials(materials);
+	box.Render(render);
+}
+
 int main()
 {
 	std::shared_ptr<MeshManager> meshManager = std::make_shared<MeshManager>();
@@ -160,9 +199,11 @@ int main()
 	Camera camera;
 
 	//camera.SetPos(glm::vec3(0.6f, 0.6f, 0.6f));
+	//camera.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+
+	camera.SetPos(glm::vec3(0.0f, 1.0f, -3.0f));
 	
-	camera.SetPos(glm::vec3(0.0f, 2.0f, -2.0f));
-	camera.SetTarget(glm::vec3(0));
+	camera.SetTarget(glm::vec3(0,0,0));
 	camera.SetPerspective(glm::radians(60.0f), (float)SRC_WIDTH / SRC_HEIGHT, 0.3f, 100.0f);
 
 	Render render;
@@ -170,9 +211,11 @@ int main()
 
 	//RenderHero(render, camera, meshManager, bmpManager);
 	
-	//RenderBox(render, camera, meshManager,bmpManager);
+	RenderBox(render, camera, meshManager,bmpManager);
 	
-	RenderShaderBall(render, camera, meshManager, bmpManager);
+	RenderSkyBox(render, camera, meshManager);
+
+	//RenderShaderBall(render, camera, meshManager, bmpManager);
 	
 	render.output();
 

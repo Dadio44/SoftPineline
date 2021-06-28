@@ -8,6 +8,7 @@ void CubeMap::Load(std::vector<std::string> fileName)
 	{
 		BMP::BMP* bmp = new BMP::BMP();
 		bmp->ReadFrom(path.c_str());
+		bmp->GenerateMipMap();
 		_textures.push_back(bmp);
 	}
 
@@ -74,10 +75,13 @@ CubeMapTexDiretcion CubeMap::GetTarget(float x, float y, float z, float& s, floa
 		}
 	}
 
-	assert(targetDir != None);
+	//assert(targetDir != CubeMapTexDiretcion::None);
 
 	s = 0.5f * (sc / abs(ma) + 1);
 	t = 0.5f * (tc / abs(ma) + 1);
+
+	//×ª»»±ê×¼
+	t = 1 - t;
 
 	return targetDir;
 }
