@@ -61,10 +61,8 @@ namespace BMP {
 		assert(sizeof(DIBHEADER) == 40);
 	}
 
-	void BMP::SetOutPut(const char * fileName, unsigned width, unsigned height)
+	void BMP::SetSize(unsigned width, unsigned height)
 	{
-		
-		this->_fileName = fileName;
 		this->_width = width;
 		this->_height = height;
 		this->_buffer = NULL;
@@ -75,7 +73,7 @@ namespace BMP {
 
 		_rowSize = ALIGN(_width, 4);
 		UINT32 imageSize = _height * _rowSize * BYTES_OF_PIXEL;// assert the bits of pixel is 24 = 3 * 8
-		
+
 		// initialize the DIB header
 		_bitmapFileHeader.signature = _SIGNATURE;
 		_bitmapFileHeader.fileSize = sizeof(BITMAPFILEHEADER) + sizeof(DIBHEADER) + imageSize;
@@ -95,6 +93,14 @@ namespace BMP {
 		_dibHeader.yPiexlPerMeter = _Y_PIXEL_PER_METER;
 		_dibHeader.colorsInColorTable = _COLORS_IN_COLOR_TABLE;
 		_dibHeader.importantColorCount = _IMPORTANT_COLOR_COUNT;
+	}
+
+
+	void BMP::SetOutPut(const char * fileName, unsigned width, unsigned height)
+	{
+		
+		this->_fileName = fileName;
+		SetSize(width, height);
 
 		// malloc the memories of buffer
 		_buffer = static_cast<UINT8*>(malloc(_dibHeader.imageSize));
@@ -371,16 +377,6 @@ namespace BMP {
 		return res;
 	}
 
-	Color BMP::Lerp(Color c1, Color c2, float t)const
-	{
-		Color res;
-
-		res.r = c1.r + (c2.r - c1.r) * t;
-		res.g = c1.g + (c2.g - c1.g) * t;
-		res.b = c1.b + (c2.b - c1.b) * t;
-
-		return res;
-	}
 
 	Color BMP::Sampler(float u, float v, float mipmapLevel)const
 	{
@@ -417,10 +413,10 @@ namespace BMP {
 		float ht = glm::fract(ux);
 		float vt = glm::fract(uy);
 
-		auto ch1 = Lerp(c0, c1, ht);
-		auto ch2 = Lerp(c2, c3, ht);
+		auto ch1 = Color::Lerp(c0, c1, ht);
+		auto ch2 = Color::Lerp(c2, c3, ht);
 
-		return Lerp(ch1, ch2, vt);
+		return Color::Lerp(ch1, ch2, vt);
 	}
 
 	Color BMP::Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy) const

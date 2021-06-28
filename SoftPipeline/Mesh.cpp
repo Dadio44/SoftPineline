@@ -1,6 +1,9 @@
 #include "Mesh.h"
 #include <iostream>
 #include <assert.h>
+#include <Windows.h>
+#include <direct.h>
+#include <errors.h>
 
 Mesh::Mesh():
 	_buffer(nullptr),

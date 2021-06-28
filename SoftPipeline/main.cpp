@@ -16,6 +16,8 @@
 #include "SimpleLitMaterail.h"
 #include "SkyBoxMaterial.h"
 
+#include "platform.h"
+
 const int SRC_WIDTH = 1920;
 const int SRC_HEIGHT = 1080;
 
@@ -191,7 +193,7 @@ void RenderSkyBox(Render& render,
 	box.Render(render);
 }
 
-int main()
+void Loop()
 {
 	std::shared_ptr<MeshManager> meshManager = std::make_shared<MeshManager>();
 	std::shared_ptr<BMPManager> bmpManager = std::make_shared<BMPManager>();
@@ -202,24 +204,47 @@ int main()
 	//camera.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 
 	camera.SetPos(glm::vec3(0.0f, 1.0f, -3.0f));
-	
-	camera.SetTarget(glm::vec3(0,0,0));
+
+	camera.SetTarget(glm::vec3(0, 0, 0));
 	camera.SetPerspective(glm::radians(60.0f), (float)SRC_WIDTH / SRC_HEIGHT, 0.3f, 100.0f);
 
+	auto window = window_create("", SRC_WIDTH, SRC_HEIGHT);
+
 	Render render;
-	render.Init(SRC_WIDTH, SRC_HEIGHT);
+	render.Init(window->surface);
 
 	//RenderHero(render, camera, meshManager, bmpManager);
+
 	
-	RenderBox(render, camera, meshManager,bmpManager);
-	
-	RenderSkyBox(render, camera, meshManager);
 
 	//RenderShaderBall(render, camera, meshManager, bmpManager);
+
 	
+	while (!window_should_close(window)) 
+	{
+		render.ClearColor(Color::black);
+		render.ClearDepth(2);
+
+		RenderBox(render, camera, meshManager, bmpManager);
+
+		RenderSkyBox(render, camera, meshManager);
+
+		window_draw_buffer(window);
+
+		input_poll_events();
+	}
+
+	
+
+	window_destroy(window);
 	render.output();
+}
 
+int main()
+{
+	platform_initialize();
+	Loop();
 	//system("pause");
-
+	platform_terminate();
 	return 0;
 }

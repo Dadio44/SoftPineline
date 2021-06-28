@@ -17,6 +17,8 @@ struct Color
 	Color multiply(float s)const;
 	static Color Random();
 
+	static Color Lerp(Color c1, Color c2, float t);
+
 	static Color black;
 	static Color white;
 	static Color red;

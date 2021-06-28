@@ -47,3 +47,16 @@ Color Color::multiply(float s)const
 {
 	return Color(r * s, g * s, b * s);
 }
+
+
+
+Color Color::Lerp(Color c1, Color c2, float t)
+{
+	Color res;
+
+	res.r = c1.r + (c2.r - c1.r) * t;
+	res.g = c1.g + (c2.g - c1.g) * t;
+	res.b = c1.b + (c2.b - c1.b) * t;
+
+	return res;
+}

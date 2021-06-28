@@ -1,20 +1,15 @@
 #ifndef _RENDERTARGET_H_
 #define _RENDERTARGET_H_
 
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <vector>
 #include <string>
 
 #include "glm/glm.hpp"
 #include "Color.h"
+#include "ITexture2D.h"
+#include "IRenderTarget.h"
 
 namespace BMP {
-
-	typedef unsigned short UINT16;
-	typedef unsigned UINT32;
-	typedef unsigned char UINT8;
-	typedef UINT8 ColorPass;
 
 #pragma pack(push,2)
 	struct BITMAPFILEHEADER
@@ -42,7 +37,9 @@ namespace BMP {
 
 #pragma pack(pop)
 
-	class BMP
+	class BMP : 
+		public ITexture2D,
+		public IRenderTarget
 	{
 	private:
 
@@ -60,43 +57,53 @@ namespace BMP {
 		void GetMipmapData(int mipmapLevel,int& offset,int& rowSize)const;
 	public:
 
-		UINT32 GetWidth()const;
+		virtual UINT32 GetWidth()const override;
 		UINT32 GetMaxMipMapLevel()const
 		{
 			return _maxMipmapLevel;
 		}
-		UINT32 GetHeight()const;
+		virtual UINT32 GetHeight()const override;
 		void GetResolution(int mipMapLevel,int& width,int& height)const;
 
 		BMP();
 
 		void SetOutPut(const char * fileName, unsigned width, unsigned height);
 
-		void ReadFrom(const char * fileName);
+		virtual void SetSize(unsigned width, unsigned height) override;
 
-		~BMP();
+		virtual void ReadFrom(const char * fileName)override;
 
-		void drawPixelAt(ColorPass r, ColorPass g, ColorPass b, unsigned x, unsigned y);
+		~BMP()override;
 
-		void drawPixelAt(float r, float g, float b, unsigned x, unsigned y);
+		virtual void drawPixelAt(ColorPass r, ColorPass g, ColorPass b, unsigned x, unsigned y)override;
 
-		void drawPixelAt(const Color& c, unsigned x, unsigned y);
+		virtual void drawPixelAt(float r, float g, float b, unsigned x, unsigned y)override;
 
-		void GetColorAt(unsigned x, unsigned y, Color* color) const;
+		virtual void drawPixelAt(const Color& c, unsigned x, unsigned y)override;
 
-		void writeImage(const char* name = NULL);
+		virtual void GetColorAt(unsigned x, unsigned y, Color* color) const override;
 
-		void GenerateMipMap();
+		virtual void writeImage(const char* name = NULL)override;
+
+		virtual void GenerateMipMap()override;
 
 		void writeMipMapImage(const char* name = NULL);
 
-		Color GetColorAt(unsigned x, unsigned y, int mipmapLevel)const;
+		virtual Color GetColorAt(unsigned x, unsigned y, int mipmapLevel)const override;
 
-		Color Lerp(Color c1, Color c2, float t)const;
+		virtual Color Sampler(float u, float v, float mipmapLevel)const override;
 
-		Color Sampler(float u, float v, float mipmapLevel)const;
+		virtual Color Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy)const override;
 
-		Color Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy)const;
+		virtual unsigned char** GetBitmapBufferAddress() override
+		{
+			return &_buffer;
+		}
+
+		virtual void SetBitmapBuffer(unsigned char* buffer) override
+		{
+			_buffer = buffer;
+		}
 	};
 
 }

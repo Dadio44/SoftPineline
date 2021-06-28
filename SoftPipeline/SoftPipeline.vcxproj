@@ -105,7 +105,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -141,7 +141,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -158,10 +158,13 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="IMaterial.cpp" />
+    <ClCompile Include="IRenderTarget.cpp" />
+    <ClCompile Include="ITexture2D.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="platform.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="SimpleLitMaterail.cpp" />
     <ClCompile Include="SkyBoxMaterial.cpp" />
@@ -179,12 +182,16 @@
     <ClInclude Include="IMaterial.h" />
     <ClInclude Include="IModelProp.h" />
     <ClInclude Include="IPixelShader.h" />
+    <ClInclude Include="IRenderTarget.h" />
+    <ClInclude Include="ITexture2D.h" />
     <ClInclude Include="IVertexShader.h" />
     <ClInclude Include="IVPProp.h" />
+    <ClInclude Include="macro.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="IResouceManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="platform.h" />
     <ClInclude Include="RasterOutput.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="SimpleLitMaterail.h" />

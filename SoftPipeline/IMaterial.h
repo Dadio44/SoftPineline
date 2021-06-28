@@ -10,6 +10,8 @@ class IMaterial :
 	public ICullOption,
 	public IBlendOption
 {
+
+public :
 	virtual CullingType GetCullingOption() override
 	{
 		return CullingType::Back;
@@ -19,5 +21,7 @@ class IMaterial :
 	{
 		return false;
 	}
+
+	virtual ~IMaterial(){}
 };
 

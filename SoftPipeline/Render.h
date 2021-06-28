@@ -26,7 +26,7 @@ private:
 	int _width;
 	int _height;
 
-	BMP::BMP rt;
+	IRenderTarget* _rt;
 	float* depthBuffer;
 	RasterOutput* rasterOutBuffer;
 
@@ -69,8 +69,8 @@ public:
 		int y);
 
 	RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-	void ClearColor(BMP::BMP& rt);
-	void ClearDepth(float value, float* depthBuffer);
+	void ClearColor(const Color& color);
+	void ClearDepth(float value);
 
 	void SetShader(const IVertexShader* vs, const IPixelShader* ps);
 	void SetCullingOption(CullingType cullingtype)
@@ -86,24 +86,23 @@ public:
 
 	void Draw(const Mesh& mesh);
 
-	void Init(int width,int height)
+	void Init(IRenderTarget* rt)
 	{
-		_width = width;
-		_height = height;
+		_rt = rt;
+		_width = rt->GetWidth();
+		_height = rt->GetHeight();
 
 
 		depthBuffer = static_cast<float*>(malloc(sizeof(float) * _width * _height));
 
 		rasterOutBuffer = static_cast<RasterOutput*>(malloc(sizeof(RasterOutput) * _width * _height));
 
-		rt.SetOutPut("renderTarget.bmp", _width, _height);
-		ClearColor(rt);
-		ClearDepth(2, depthBuffer);
+		//rt.SetOutPut("renderTarget.bmp", _width, _height);
 	}
 
 	void output()
 	{
-		rt.writeImage();
+		//_rt->writeImage();
 	}
 
 	Render()

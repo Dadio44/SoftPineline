@@ -341,15 +341,15 @@ void Render::DrawPixel(const RasterOutput& v, const RasterOutput& dx, const Rast
 	if (_enabledBlend)
 	{
 		Color dstCol;
-		rt.GetColorAt(v.screenPos.x, v.screenPos.y, &dstCol);
+		_rt->GetColorAt(v.screenPos.x, v.screenPos.y, &dstCol);
 		
 		auto blendCol = color.multiply(color.a).add(dstCol.multiply(1 - color.a));
 	
-		rt.drawPixelAt(blendCol, v.screenPos.x, v.screenPos.y);
+		_rt->drawPixelAt(blendCol, v.screenPos.x, v.screenPos.y);
 	}
 	else
 	{
-		rt.drawPixelAt(color, v.screenPos.x, v.screenPos.y);
+		_rt->drawPixelAt(color, v.screenPos.x, v.screenPos.y);
 	}
 }
 
@@ -403,19 +403,19 @@ RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 }
 
 
-void Render::ClearColor(BMP::BMP& rt)
+void Render::ClearColor(const Color& color)
 {
 	for (int i = 0; i < _width; i++)
 	{
 		for (int j = 0; j < _height; j++)
 		{
-			rt.drawPixelAt(0.0f, 0.0f, 0.0f, i, j);
+			_rt->drawPixelAt(color, i, j);
 		}
 	}
 
 }
 
-void Render::ClearDepth(float value, float* depthBuffer)
+void Render::ClearDepth(float value)
 {
 	for (int j = 0; j < _height; j++)
 	{
