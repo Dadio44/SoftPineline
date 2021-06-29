@@ -18,8 +18,8 @@
 
 #include "platform.h"
 
-const int SRC_WIDTH = 1920;
-const int SRC_HEIGHT = 1080;
+const int SRC_WIDTH = 1920 / 2;
+const int SRC_HEIGHT = 1080 / 2;
 
 using namespace ResourceManager;
 
@@ -193,6 +193,27 @@ void RenderSkyBox(Render& render,
 	box.Render(render);
 }
 
+void UpdateCamera(window* window, Camera& camera)
+{
+	float speed = 0.1f;
+	if (input_key_pressed(window, KEY_A)) {
+		
+	}
+	if (input_key_pressed(window, KEY_D)) {
+		
+	}
+	if (input_key_pressed(window, KEY_S)) {
+		auto forward = camera.GetForward();
+
+		camera.SetPos(camera.GetPos() - speed * forward);
+	}
+	if (input_key_pressed(window, KEY_W)) {
+		auto forward = camera.GetForward();
+
+		camera.SetPos(camera.GetPos() + speed * forward);
+	}
+}
+
 void Loop()
 {
 	std::shared_ptr<MeshManager> meshManager = std::make_shared<MeshManager>();
@@ -208,7 +229,7 @@ void Loop()
 	camera.SetTarget(glm::vec3(0, 0, 0));
 	camera.SetPerspective(glm::radians(60.0f), (float)SRC_WIDTH / SRC_HEIGHT, 0.3f, 100.0f);
 
-	auto window = window_create("", SRC_WIDTH, SRC_HEIGHT);
+	auto window = window_create("Ass", SRC_WIDTH, SRC_HEIGHT);
 
 	Render render;
 	render.Init(window->surface);
@@ -219,19 +240,44 @@ void Loop()
 
 	//RenderShaderBall(render, camera, meshManager, bmpManager);
 
-	
+	float prev_time;
+	float print_time;
+	int num_frames;
+
+	num_frames = 0;
+	prev_time = platform_get_time();
+	print_time = prev_time;
+
+	char title[128];
+
 	while (!window_should_close(window)) 
 	{
+		float curr_time = platform_get_time();
+		float delta_time = curr_time - prev_time;
+
+		num_frames += 1;
+		if (curr_time - print_time >= 1) {
+			int sum_millis = (int)((curr_time - print_time) * 1000);
+			int avg_millis = sum_millis / num_frames;
+			sprintf(title, "fps: %3d, avg: %3d ms\n", num_frames, avg_millis);
+			SetWindowTextA(window->handle, title);
+			//printf("fps: %3d, avg: %3d ms\n", num_frames, avg_millis);
+			num_frames = 0;
+			print_time = curr_time;
+		}
+		prev_time = curr_time;
+
 		render.ClearColor(Color::black);
 		render.ClearDepth(2);
 
 		RenderBox(render, camera, meshManager, bmpManager);
 
-		RenderSkyBox(render, camera, meshManager);
-
+		//RenderSkyBox(render, camera, meshManager);
 		window_draw_buffer(window);
 
+
 		input_poll_events();
+		UpdateCamera(window, camera);
 	}
 
 	

@@ -7,10 +7,20 @@ class Camera
 {
 public:
 
+	glm::vec3 GetForward()const
+	{
+		return _lookAt - _pos;
+	}
+
 	void SetPos(glm::vec3 pos)
 	{
 		_pos = pos;
 		UpdateView();
+	}
+
+	glm::vec3 GetPos()const
+	{
+		return _pos;
 	}
 
 	void SetTarget(glm::vec3 lookAt)
