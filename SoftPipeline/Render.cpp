@@ -135,21 +135,20 @@ void Render::Rasterize(const std::vector<VertexOutPut>& vsOutput, int verticesCo
 {
 	for (int i = 0; i < verticesCount; i += 3)
 	{
-		int cnt = SutherlandHodgeman(
-			_vsout[i],
-			_vsout[i + 1],
-			_vsout[i + 2]);
+			int cnt = SutherlandHodgeman(
+				_vsout[i],
+				_vsout[i + 1],
+				_vsout[i + 2]);
 
-		//GL_TRIANGLES_FAN方式组装
-		for (int j = 2; j < cnt; j++)
-		{
-			DrawTriangle(
-				GetRasterOutput(_cullResBufs[_curOutputBufIndex][0]),
-				GetRasterOutput(_cullResBufs[_curOutputBufIndex][j - 1]),
-				GetRasterOutput(_cullResBufs[_curOutputBufIndex][j]));
-		}
+			//GL_TRIANGLES_FAN方式组装
+			for (int j = 2; j < cnt; j++)
+			{
+				DrawTriangle(
+					GetRasterOutput(_cullResBufs[_curOutputBufIndex][0]),
+					GetRasterOutput(_cullResBufs[_curOutputBufIndex][j - 1]),
+					GetRasterOutput(_cullResBufs[_curOutputBufIndex][j]));
+			}
 	}
-
 }
 
 void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const RasterOutput& v3)
@@ -174,36 +173,36 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 	maxY = glm::max(0, maxY);
 	maxY = glm::min(_height - 1, maxY);
 
-	assert(0 <= minX && minX <= maxX && maxX <= _width);
-	assert(0 <= minY && minY <= maxY && maxY <= _height);
+	assert(0 <= minX && minX <= maxX && maxX < _width);
+	assert(0 <= minY && minY <= maxY && maxY < _height);
 
-	const glm::vec2& A = v1.screenPos;
-	const glm::vec2& B = v2.screenPos;
-	const glm::vec2& C = v3.screenPos;
-	glm::vec2 P = glm::vec2(minX, minY);
+	const glm::ivec2& A = v1.screenPos;
+	const glm::ivec2& B = v2.screenPos;
+	const glm::ivec2& C = v3.screenPos;
+	glm::ivec2 P = glm::ivec2(minX, minY);
 
-	float i01 = A.y - B.y;
-	float j01 = B.x - A.x;
-	float k01 = A.x * B.y - A.y * B.x;
-	float f01 = i01 * P.x + j01 * P.y + k01;
+	int i01 = A.y - B.y;
+	int j01 = B.x - A.x;
+	int k01 = A.x * B.y - A.y * B.x;
+	int f01 = i01 * P.x + j01 * P.y + k01;
 
-	float i02 = B.y - C.y;
-	float j02 = C.x - B.x;
-	float k02 = B.x * C.y - B.y * C.x;
-	float f02 = i02 * P.x + j02 * P.y + k02;
+	int i02 = B.y - C.y;
+	int j02 = C.x - B.x;
+	int k02 = B.x * C.y - B.y * C.x;
+	int f02 = i02 * P.x + j02 * P.y + k02;
 
-	float i03 = C.y - A.y;
-	float j03 = A.x - C.x;
-	float k03 = C.x * A.y - C.y * A.x;
-	float f03 = i03 * P.x + j03 * P.y + k03;
+	int i03 = C.y - A.y;
+	int j03 = A.x - C.x;
+	int k03 = C.x * A.y - C.y * A.x;
+	int f03 = i03 * P.x + j03 * P.y + k03;
 
-	float cy1 = f01;
-	float cy2 = f02;
-	float cy3 = f03;
+	int cy1 = f01;
+	int cy2 = f02;
+	int cy3 = f03;
 
-	float cx1;
-	float cx2;
-	float cx3;
+	int cx1;
+	int cx2;
+	int cx3;
 
 	float square = f01 + f02 + f03;
 
@@ -229,9 +228,6 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 
 
 	float oneDevidesquare = 1.0f / square;
-
-	int triWidth = maxX - minX + 1;
-
 
 
 	for (int y = minY; y <= maxY; y++)
@@ -263,9 +259,9 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 	int preX;
 	int preY;
 
-	for (int y = minY; y <= maxY; y++)
+	for (int y = minY; y < maxY; y++)
 	{
-		for (int x = minX; x <= maxX; x++)
+		for (int x = minX ; x < maxX; x++)
 		{
 			int srcPosIndex = x + y * _width;
 			RasterOutput& ro = rasterOutBuffer[srcPosIndex];
@@ -366,20 +362,20 @@ RasterOutput Render::GetInterpolationValue(
 	RasterOutput res;
 
 	res.screenPos.x = x;
-	res.screenPos.y = y;
-
+	res.screenPos.y = y;	
 
 	res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
 
-	float sw = 1 / res.sv_position.w;
-
-	u = u * sw;
-	v = v * sw;
-	w = w * sw;
+	u = u * res.sv_position.w;
+	v = v * res.sv_position.w;
+	w = w * res.sv_position.w;
 
 	res.position = (v1.position * u + v2.position * v + v3.position * w);
 	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
+
 	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w);
+
+
 
 	return res;
 }
@@ -387,16 +383,19 @@ RasterOutput Render::GetInterpolationValue(
 RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 {
 	RasterOutput rasterOutput;
+	float w = vertex.sv_position.w;
+
 	//透视除法
-	float invW = 1 / vertex.sv_position.w;
+	float invW = 1.0f / w;
 
 	rasterOutput.sv_position = vertex.sv_position * invW;
-	rasterOutput.sv_position.w = invW;
+	rasterOutput.sv_position.w = w;
 	rasterOutput.normal = vertex.normal * invW;
 	rasterOutput.position = vertex.position * invW;
 	rasterOutput.uv = vertex.uv * invW;
-	rasterOutput.screenPos.x = (rasterOutput.sv_position.x * 0.5 + 0.5) * (_width - 1);
-	rasterOutput.screenPos.y = (rasterOutput.sv_position.y * 0.5 + 0.5) * (_height - 1);
+	//四舍五入，消除接缝
+	rasterOutput.screenPos.x = ((rasterOutput.sv_position.x * 0.5f + 0.5f) * (_width - 1) + 0.5f);
+	rasterOutput.screenPos.y = ((rasterOutput.sv_position.y * 0.5f + 0.5f) * (_height - 1) + 0.5f);
 
 
 	return rasterOutput;

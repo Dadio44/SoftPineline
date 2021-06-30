@@ -36,7 +36,7 @@ void RenderBox(
 	glm::mat4x4 model = glm::mat4x4(1);
 	model = glm::translate(model, glm::vec3(0));
 
-	//model = glm::rotate(model,glm::radians(45.0f), glm::vec3(0, 1, 0));
+	model = glm::rotate(model,glm::radians(45.0f), glm::vec3(0, 1, 0));
 	//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1, 0, 0));
 
 	Model box(model);
@@ -48,9 +48,12 @@ void RenderBox(
 
 	std::vector<IMaterial*> materials;
 
-	auto id = bmpManager->Load("512_UVChecker.bmp");
+	/*auto id = bmpManager->Load("512_UVChecker.bmp");
 	auto mat = new UnlitMaterial(
-		bmpManager->Get(id));
+		bmpManager->Get(id));*/
+
+	auto mat = new SimpleLitMaterail(Color(1.0f,0,0,0.3f));
+
 	mat->SetViewProjection(cam.GetView(), cam.GetProjection());
 
 	/*auto mat = new SimpleLitMaterail(Color::red);
@@ -263,6 +266,10 @@ void UpdateCamera(window* window, Camera& camera)
 
 		camera.SetTarget(camera.GetPos() + cameraFront);
 	}
+	else
+	{
+		firstMouse = true;
+	}
 }
 
 void Loop()
@@ -285,10 +292,6 @@ void Loop()
 	Render render;
 	render.Init(window->surface);
 
-	
-	
-
-	//RenderShaderBall(render, camera, meshManager, bmpManager);
 
 	float prev_time;
 	float print_time;
@@ -319,10 +322,12 @@ void Loop()
 		render.ClearColor(Color::black);
 		render.ClearDepth(2);
 
-		RenderHero(render, camera, meshManager, bmpManager);
+		//RenderHero(render, camera, meshManager, bmpManager);
 
 
-		//RenderBox(render, camera, meshManager, bmpManager);
+		RenderBox(render, camera, meshManager, bmpManager);
+
+		//RenderShaderBall(render, camera, meshManager, bmpManager);
 
 		//RenderSkyBox(render, camera, meshManager);
 		window_draw_buffer(window);
