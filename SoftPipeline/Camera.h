@@ -12,9 +12,24 @@ public:
 		return _lookAt - _pos;
 	}
 
+	glm::vec3 GetRight()const
+	{
+		auto f = GetForward();
+		f.y = 0;
+		return glm::cross(f,glm::vec3(0,1,0));
+	}
+
 	void SetPos(glm::vec3 pos)
 	{
 		_pos = pos;
+		UpdateView();
+	}
+
+	void Trasnlate(glm::vec3 moveVec)
+	{
+		_pos += moveVec;
+		_lookAt += moveVec;
+
 		UpdateView();
 	}
 

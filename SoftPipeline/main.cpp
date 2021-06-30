@@ -197,20 +197,25 @@ void UpdateCamera(window* window, Camera& camera)
 {
 	float speed = 0.1f;
 	if (input_key_pressed(window, KEY_A)) {
-		
+		auto right = camera.GetRight();
+
+		camera.Trasnlate(- speed * right);
 	}
 	if (input_key_pressed(window, KEY_D)) {
 		
+		auto right = camera.GetRight();
+
+		camera.Trasnlate(speed * right);
 	}
 	if (input_key_pressed(window, KEY_S)) {
 		auto forward = camera.GetForward();
 
-		camera.SetPos(camera.GetPos() - speed * forward);
+		camera.Trasnlate(-speed * forward);
 	}
 	if (input_key_pressed(window, KEY_W)) {
 		auto forward = camera.GetForward();
 
-		camera.SetPos(camera.GetPos() + speed * forward);
+		camera.Trasnlate(speed * forward);
 	}
 }
 
@@ -249,7 +254,6 @@ void Loop()
 	print_time = prev_time;
 
 	char title[128];
-
 	while (!window_should_close(window)) 
 	{
 		float curr_time = platform_get_time();
