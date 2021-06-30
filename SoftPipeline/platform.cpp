@@ -270,7 +270,6 @@ static void present_surface(window_t *window) {
 }
 
 void window_draw_buffer(window_t *window) {
-    //private_blit_bgr(buffer, window->surface);
     present_surface(window);
 }
 

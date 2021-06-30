@@ -23,6 +23,10 @@ const int SRC_HEIGHT = 1080 / 2;
 
 using namespace ResourceManager;
 
+float lastX = 0, lastY = 0;
+float yaw = 90, pitch = 0;
+bool firstMouse = true;
+
 void RenderBox(
 	Render& render,
 	const Camera& cam,
@@ -218,6 +222,44 @@ void UpdateCamera(window* window, Camera& camera)
 
 		camera.Trasnlate(speed * forward);
 	}
+
+	float xpos, ypos;
+
+	input_query_cursor(window, &xpos, &ypos);
+
+
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.05;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	auto cameraFront = glm::normalize(front);
+
+	camera.SetTarget(camera.GetPos() + cameraFront);
+
 }
 
 void Loop()
@@ -230,9 +272,9 @@ void Loop()
 	//camera.SetPos(glm::vec3(0.6f, 0.6f, 0.6f));
 	//camera.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 
-	camera.SetPos(glm::vec3(0.0f, 1.0f, -3.0f));
+	camera.SetPos(glm::vec3(0.0f, 0.0f, -3.0f));
 
-	camera.SetTarget(glm::vec3(0, 0, 0));
+	//camera.SetTarget(glm::vec3(0, 0, 0));
 	camera.SetPerspective(glm::radians(60.0f), (float)SRC_WIDTH / SRC_HEIGHT, 0.3f, 100.0f);
 
 	auto window = window_create("Ass", SRC_WIDTH, SRC_HEIGHT);
@@ -263,7 +305,7 @@ void Loop()
 		if (curr_time - print_time >= 1) {
 			int sum_millis = (int)((curr_time - print_time) * 1000);
 			int avg_millis = sum_millis / num_frames;
-			sprintf(title, "fps: %3d, avg: %3d ms\n", num_frames, avg_millis);
+			sprintf(title, "fps: %3d, avg: %3d  %f %f ms\n", num_frames, avg_millis,yaw,pitch);
 			SetWindowTextA(window->handle, title);
 			//printf("fps: %3d, avg: %3d ms\n", num_frames, avg_millis);
 			num_frames = 0;
@@ -274,10 +316,10 @@ void Loop()
 		render.ClearColor(Color::black);
 		render.ClearDepth(2);
 
-		RenderHero(render, camera, meshManager, bmpManager);
+		//RenderHero(render, camera, meshManager, bmpManager);
 
 
-		//RenderBox(render, camera, meshManager, bmpManager);
+		RenderBox(render, camera, meshManager, bmpManager);
 
 		//RenderSkyBox(render, camera, meshManager);
 		window_draw_buffer(window);
