@@ -122,9 +122,10 @@ void RenderHero(
 	glm::vec3 pos = glm::vec3(0) - offset;
 
 	glm::mat4x4 model = glm::mat4x4(1);
+	model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0, 1, 0));
 	model = glm::translate(model, pos);
 
-	//model = glm::rotate(model,glm::radians(30.0f), glm::vec3(1, 0, -1.0f));
+	
 	//model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0, 1.0, 0));
 
 	Model hero(model);
@@ -239,8 +240,7 @@ void Loop()
 	Render render;
 	render.Init(window->surface);
 
-	//RenderHero(render, camera, meshManager, bmpManager);
-
+	
 	
 
 	//RenderShaderBall(render, camera, meshManager, bmpManager);
@@ -274,7 +274,10 @@ void Loop()
 		render.ClearColor(Color::black);
 		render.ClearDepth(2);
 
-		RenderBox(render, camera, meshManager, bmpManager);
+		RenderHero(render, camera, meshManager, bmpManager);
+
+
+		//RenderBox(render, camera, meshManager, bmpManager);
 
 		//RenderSkyBox(render, camera, meshManager);
 		window_draw_buffer(window);
