@@ -402,28 +402,14 @@ RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 	return rasterOutput;
 }
 
-
 void Render::ClearColor(const Color& color)
 {
-	for (int i = 0; i < _width; i++)
-	{
-		for (int j = 0; j < _height; j++)
-		{
-			_rt->drawPixelAt(color, i, j);
-		}
-	}
-
+	_rt->ClearColor(color);
 }
 
 void Render::ClearDepth(float value)
 {
-	for (int j = 0; j < _height; j++)
-	{
-		for (int i = 0; i < _width; i++)
-		{
-			depthBuffer[j * _width + i] = value;
-		}
-	}
+	std::fill(depthBuffer, depthBuffer + _width * _height, value);
 }
 
 void Render::SetShader(const IVertexShader* vs, const IPixelShader* ps)

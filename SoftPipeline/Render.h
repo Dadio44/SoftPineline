@@ -69,7 +69,7 @@ public:
 		int y);
 
 	RasterOutput GetRasterOutput(const VertexOutPut& vertex);
-	void ClearColor(const Color& color);
+	void ClearColor(const Color&);
 	void ClearDepth(float value);
 
 	void SetShader(const IVertexShader* vs, const IPixelShader* ps);

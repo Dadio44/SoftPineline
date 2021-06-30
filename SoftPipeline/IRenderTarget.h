@@ -23,6 +23,8 @@ public:
 
 	virtual void GetColorAt(unsigned x, unsigned y, Color* color) const = 0;
 
+	virtual void ClearColor(const Color& c) = 0;
+
 	virtual ~IRenderTarget() {}
 };
 

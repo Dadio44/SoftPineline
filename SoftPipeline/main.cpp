@@ -319,10 +319,10 @@ void Loop()
 		render.ClearColor(Color::black);
 		render.ClearDepth(2);
 
-		//RenderHero(render, camera, meshManager, bmpManager);
+		RenderHero(render, camera, meshManager, bmpManager);
 
 
-		RenderBox(render, camera, meshManager, bmpManager);
+		//RenderBox(render, camera, meshManager, bmpManager);
 
 		//RenderSkyBox(render, camera, meshManager);
 		window_draw_buffer(window);

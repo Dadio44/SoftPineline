@@ -37,6 +37,30 @@ namespace BMP {
 
 #pragma pack(pop)
 
+
+	struct BMPColor
+	{
+		ColorPass r;
+		ColorPass g;
+		ColorPass b;
+
+		BMPColor() {}
+
+		//BMPColor(const BMPColor&& color)
+		//{
+		//	r = color.r;
+		//	g = color.g;
+		//	b = color.b;
+		//}
+
+		//BMPColor(const BMPColor& color)
+		//{
+		//	r = color.r;
+		//	g = color.g;
+		//	b = color.b;
+		//}
+	};
+
 	class BMP : 
 		public ITexture2D,
 		public IRenderTarget
@@ -104,6 +128,8 @@ namespace BMP {
 		{
 			_buffer = buffer;
 		}
+
+		virtual void ClearColor(const Color& c) override;
 	};
 
 }

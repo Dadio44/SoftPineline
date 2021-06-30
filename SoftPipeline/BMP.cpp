@@ -419,6 +419,17 @@ namespace BMP {
 		return Color::Lerp(ch1, ch2, vt);
 	}
 
+	void BMP::ClearColor(const Color& c)
+	{
+		BMPColor bmpc;
+		bmpc.r = c.b;
+		bmpc.g = c.g;
+		bmpc.b = c.r;
+
+		BMPColor* cols = reinterpret_cast<BMPColor*>(_buffer);
+		std::fill(cols, cols + _width * _height, std::move(bmpc));
+	}
+
 	Color BMP::Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy) const
 	{
 		ddx.x *= GetWidth();
