@@ -117,7 +117,7 @@ namespace BMP {
 
 		virtual Color Sampler(float u, float v, float mipmapLevel)const override;
 
-		virtual Color Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy)const override;
+		virtual Color Sampler(float u, float v, glm::vec2& ddx, glm::vec2& ddy)const override;
 
 		virtual unsigned char** GetBitmapBufferAddress() override
 		{

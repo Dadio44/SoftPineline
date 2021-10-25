@@ -39,7 +39,8 @@ std::vector<glm::vec4> Render::_ViewLines = {
 };
 
 bool  Render::Inside(const glm::vec4& line, const glm::vec4& p) {
-	return line.x * p.x + line.y * p.y + line.z * p.z + line.w * p.w >= 0;
+	//面法线的w分量始终为 1
+	return line.x * p.x + line.y * p.y + line.z * p.z + p.w >= 0;
 }
 
 //交点，通过端点插值
@@ -63,11 +64,13 @@ VertexOutPut  Render::Intersect(
 	return VertexOutPut::lerp(v1, v2, weight);
 }
 
-bool Render::AllVertexsInside(const std::vector<VertexOutPut> input)
+bool Render::AllVertexsInside(const std::vector<VertexOutPut>& input)
 {
-	for (int i = 0; i < _ViewLines.size(); i++) 
+	auto sizeOfline = _ViewLines.size();
+	auto sizeOfInputs = input.size();
+	for (int i = 0; i < sizeOfline; i++) 
 	{
-		for (int j = 0; j < input.size(); j++) 
+		for (int j = 0; j < sizeOfInputs; j++) 
 		{
 			if (!Inside(_ViewLines[i], input[j].sv_position))
 			{
@@ -270,7 +273,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 				continue;
 
 			// 深度测试
-			if (depthBuffer[srcPosIndex] > ro.sv_position.z)
+			if (depthBuffer[srcPosIndex] > ro.position.z)
 			{
 				preX = srcPosIndex;
 				if (x <= minX)
@@ -324,7 +327,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 
 				DrawPixel(ro,rox,roy);
 
-				depthBuffer[srcPosIndex] = ro.sv_position.z;
+				depthBuffer[srcPosIndex] = ro.position.z;
 
 			}
 		}
@@ -364,11 +367,13 @@ RasterOutput Render::GetInterpolationValue(
 	res.screenPos.x = x;
 	res.screenPos.y = y;	
 
-	res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
+	//res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
 
-	u = u * res.sv_position.w;
-	v = v * res.sv_position.w;
-	w = w * res.sv_position.w;
+	float spw = (v1.sv_position.w * u + v2.sv_position.w * v + v3.sv_position.w * w);
+
+	u = u * spw;
+	v = v * spw;
+	w = w * spw;
 
 	res.position = (v1.position * u + v2.position * v + v3.position * w);
 	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
@@ -390,8 +395,15 @@ RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 
 	rasterOutput.sv_position = vertex.sv_position * invW;
 	rasterOutput.sv_position.w = w;
-	rasterOutput.normal = vertex.normal * invW;
-	rasterOutput.position = vertex.position * invW;
+	
+	rasterOutput.normal.x = vertex.normal.x * invW;
+	rasterOutput.normal.y = vertex.normal.y * invW;
+	rasterOutput.normal.z = vertex.normal.z * invW;
+
+	rasterOutput.position.x = vertex.position.x * invW;
+	rasterOutput.position.y = vertex.position.y * invW;
+	rasterOutput.position.z = vertex.position.z * invW;
+
 	rasterOutput.uv = vertex.uv * invW;
 	//四舍五入，消除接缝
 	rasterOutput.screenPos.x = ((rasterOutput.sv_position.x * 0.5f + 0.5f) * (_width - 1) + 0.5f);

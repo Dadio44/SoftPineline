@@ -13,7 +13,7 @@ void SimpleLitMaterail::VertexShader(const std::vector<VertexInput>& vsInput, st
 
 Color SimpleLitMaterail::PixelShader(const RasterOutput& pixelInput, const RasterOutput& dx, const RasterOutput& dy) const
 {
-	glm::vec4 lightDir(-1, 1, 0,0);
+	glm::vec3 lightDir(-1, 1, 0);
 
 	//auto position = glm::normalize(pixelInput.position);
 	

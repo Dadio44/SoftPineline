@@ -152,12 +152,12 @@ namespace BMP {
 
 	void BMP::drawPixelAt(float r, float g, float b, unsigned x, unsigned y)
 	{
-		r = fmax(0, r);
-		r = fmin(1, r);
-		b = fmax(0, b);
-		b = fmin(1, b);
-		g = fmax(0, g);
-		g = fmin(1, g);
+		r = fmax(0.0, r);
+		r = fmin(1.0, r);
+		b = fmax(0.0, b);
+		b = fmin(1.0, b);
+		g = fmax(0.0, g);
+		g = fmin(1.0, g);
 
 		drawPixelAt(
 			(ColorPass)(r * 255),
@@ -430,15 +430,17 @@ namespace BMP {
 		std::fill(cols, cols + _width * _height, std::move(bmpc));
 	}
 
-	Color BMP::Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy) const
+	Color BMP::Sampler(float u, float v, glm::vec2& ddx, glm::vec2& ddy) const
 	{
-		ddx.x *= GetWidth();
-		ddy.x *= GetWidth();
-		ddx.y *= GetHeight();
-		ddy.y *= GetHeight();
+		ddx.x *= _width;
+		ddy.x *= _width;
+		ddx.y *= _height;
+		ddy.y *= _height;
 
+		float dotDDx = ddx.x * ddx.x + ddx.y * ddx.y;
+		float dotDDy = ddy.x * ddy.x + ddy.y * ddy.y;
 
-		float rho = glm::max(glm::dot(ddx, ddx), glm::dot(ddy, ddy));
+		float rho = glm::max(dotDDx, dotDDy);
 		float lambda = 0.5 * log2(rho);
 
 		float d = glm::max(lambda, 0.0f);

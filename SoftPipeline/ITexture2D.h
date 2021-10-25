@@ -28,6 +28,6 @@ public:
 
 	virtual Color Sampler(float u, float v, float mipmapLevel)const = 0;
 
-	virtual Color Sampler(float u, float v, glm::vec2 ddx, glm::vec2 ddy)const = 0;
+	virtual Color Sampler(float u, float v, glm::vec2& ddx, glm::vec2& ddy)const = 0;
 };
 
