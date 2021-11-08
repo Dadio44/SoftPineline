@@ -15,6 +15,8 @@
 #include "UnlitMaterial.h"
 #include "SimpleLitMaterail.h"
 #include "SkyBoxMaterial.h"
+#include "PBRMaterail.h"
+
 
 #include "platform.h"
 
@@ -201,6 +203,36 @@ void RenderSkyBox(Render& render,
 	box.Render(render);
 }
 
+void RenderSphere(Render& render,
+	const Camera& cam,
+	std::shared_ptr<MeshManager>& meshManager,
+	std::shared_ptr<BMPManager>& bmpManager)
+{
+	glm::mat4x4 model = glm::mat4x4(0.05);
+	model = glm::translate(model, glm::vec3(0));
+
+	//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 1, 0));
+	
+	Model sphere(model);
+
+	std::vector<std::string> meshs;
+	meshs.push_back("Sphere.obj");
+
+	sphere.LoadMeshes(meshManager, meshs);
+
+	std::vector<IMaterial*> materials;
+
+	//auto mat = new SimpleLitMaterail(Color(1.0f, 0, 0, 0.3f));
+	auto mat = new PBRMaterail();
+
+	mat->SetViewProjection(cam.GetView(), cam.GetProjection());
+
+	materials.push_back(mat);
+
+	sphere.SetMaterials(materials);
+	sphere.Render(render);
+}
+
 void UpdateCamera(window* window, Camera& camera)
 {
 	float speed = 0.1f;
@@ -325,7 +357,9 @@ void Loop()
 		//RenderHero(render, camera, meshManager, bmpManager);
 
 
-		RenderBox(render, camera, meshManager, bmpManager);
+		RenderSphere(render, camera, meshManager, bmpManager);
+
+		//RenderBox(render, camera, meshManager, bmpManager);
 
 		//RenderShaderBall(render, camera, meshManager, bmpManager);
 

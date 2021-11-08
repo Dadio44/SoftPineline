@@ -164,6 +164,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PBRMaterail.cpp" />
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="SimpleLitMaterail.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="IResouceManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="PBRMaterail.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="RasterOutput.h" />
     <ClInclude Include="Render.h" />
