@@ -229,8 +229,8 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 		break;
 	}
 
-
-	float oneDevidesquare = 1.0f / square;
+	//此处需要是 double ，否则重心坐标（uvw）精度不足，会导致三角形邻接片元重复
+	double oneDevidesquare = 1.0 / square;
 
 
 	for (int y = minY; y <= maxY; y++)
@@ -273,7 +273,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 				continue;
 
 			// 深度测试
-			if (depthBuffer[srcPosIndex] > ro.position.z)
+			if (depthBuffer[srcPosIndex] > ro.sv_position.z)
 			{
 				preX = srcPosIndex;
 				if (x <= minX)
@@ -327,7 +327,7 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 
 				DrawPixel(ro,rox,roy);
 
-				depthBuffer[srcPosIndex] = ro.position.z;
+				depthBuffer[srcPosIndex] = ro.sv_position.z;
 
 			}
 		}
@@ -336,19 +336,19 @@ void Render::DrawTriangle(const RasterOutput& v1, const RasterOutput& v2, const 
 
 void Render::DrawPixel(const RasterOutput& v, const RasterOutput& dx, const RasterOutput& dy)
 {
-	auto color = _ps->PixelShader(v, dx, dy);
+	auto srcColor = _ps->PixelShader(v, dx, dy);
 	if (_enabledBlend)
 	{
 		Color dstCol;
 		_rt->GetColorAt(v.screenPos.x, v.screenPos.y, &dstCol);
 		
-		auto blendCol = color.multiply(color.a).add(dstCol.multiply(1 - color.a));
+		auto blendCol = srcColor.multiply(srcColor.a).add(dstCol.multiply(1 - srcColor.a));
 	
 		_rt->drawPixelAt(blendCol, v.screenPos.x, v.screenPos.y);
 	}
 	else
 	{
-		_rt->drawPixelAt(color, v.screenPos.x, v.screenPos.y);
+		_rt->drawPixelAt(srcColor, v.screenPos.x, v.screenPos.y);
 	}
 }
 
@@ -367,7 +367,7 @@ RasterOutput Render::GetInterpolationValue(
 	res.screenPos.x = x;
 	res.screenPos.y = y;	
 
-	//res.sv_position = (v1.sv_position * u + v2.sv_position * v + v3.sv_position * w);
+	
 
 	float spw = (v1.sv_position.w * u + v2.sv_position.w * v + v3.sv_position.w * w);
 
@@ -375,9 +375,14 @@ RasterOutput Render::GetInterpolationValue(
 	v = v * spw;
 	w = w * spw;
 
+	
+	res.sv_position.z = spw;
+
+	//res.sv_position.z = (v1.sv_position.z * u + v2.sv_position.z * v + v3.sv_position.z * w);
+
+
 	res.position = (v1.position * u + v2.position * v + v3.position * w);
 	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
-
 	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w);
 
 
