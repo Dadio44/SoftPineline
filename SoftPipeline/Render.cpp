@@ -369,21 +369,15 @@ RasterOutput Render::GetInterpolationValue(
 
 	
 
-	float spw = (v1.sv_position.w * u + v2.sv_position.w * v + v3.sv_position.w * w);
+	float invW = (v1.sv_position.w * u + v2.sv_position.w * v + v3.sv_position.w * w);
 
-	u = u * spw;
-	v = v * spw;
-	w = w * spw;
+	float W = 1.0f / invW;
 
-	
-	res.sv_position.z = spw;
+	res.sv_position.z = W;
 
-	//res.sv_position.z = (v1.sv_position.z * u + v2.sv_position.z * v + v3.sv_position.z * w);
-
-
-	res.position = (v1.position * u + v2.position * v + v3.position * w);
-	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w);
-	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w);
+	res.position = (v1.position * u + v2.position * v + v3.position * w) * W;
+	res.normal = (v1.normal * u + v2.normal * v + v3.normal * w) * W;
+	res.uv = (v1.uv * u + v2.uv * v + v3.uv * w) * W;
 
 
 
@@ -399,7 +393,7 @@ RasterOutput Render::GetRasterOutput(const VertexOutPut& vertex)
 	float invW = 1.0f / w;
 
 	rasterOutput.sv_position = vertex.sv_position * invW;
-	rasterOutput.sv_position.w = w;
+	rasterOutput.sv_position.w = invW;
 	
 	rasterOutput.normal.x = vertex.normal.x * invW;
 	rasterOutput.normal.y = vertex.normal.y * invW;
