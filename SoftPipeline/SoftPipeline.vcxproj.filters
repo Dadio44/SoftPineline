@@ -93,6 +93,9 @@
     <ClCompile Include="IRenderTarget.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
+    <ClCompile Include="PBRMaterail.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test.h">
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="IRenderTarget.h">
       <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="PBRMaterail.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

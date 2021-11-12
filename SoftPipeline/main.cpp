@@ -1,7 +1,15 @@
+
+
+#define GLM_FORCE_INTRINSICS
+#define GLM_FORCE_ALIGNED_GENTYPES
+#define GLM_FORCE_INLINE
+
+#include "platform.h"
+
+
 #include <vector>
 #include <iostream>
 #include <memory>
-
 
 
 //#include "test.h"
@@ -18,7 +26,7 @@
 #include "PBRMaterail.h"
 
 
-#include "platform.h"
+
 
 const int SRC_WIDTH = 1920 / 2;
 const int SRC_HEIGHT = 1080 / 2;
@@ -35,7 +43,7 @@ void RenderBox(
 	std::shared_ptr<MeshManager>& meshManager,
 	std::shared_ptr<BMPManager>& bmpManager)
 {
-	glm::mat4x4 model = glm::mat4x4(1);
+	glm::mat4x4 model = glm::mat4x4(0.05);
 	model = glm::translate(model, glm::vec3(0));
 
 	model = glm::rotate(model,glm::radians(45.0f), glm::vec3(0, 1, 0));
@@ -50,11 +58,11 @@ void RenderBox(
 
 	std::vector<IMaterial*> materials;
 
-	/*auto id = bmpManager->Load("512_UVChecker.bmp");
+	auto id = bmpManager->Load("512_UVChecker.bmp");
 	auto mat = new UnlitMaterial(
-		bmpManager->Get(id));*/
+		bmpManager->Get(id));
 
-	auto mat = new SimpleLitMaterail(Color(1.0f,0,0,0.3f));
+	//auto mat = new SimpleLitMaterail(Color(1.0f,0,0,0.3f));
 
 	mat->SetViewProjection(cam.GetView(), cam.GetProjection());
 
@@ -73,7 +81,7 @@ void RenderShaderBall(
 	std::shared_ptr<MeshManager>& meshManager,
 	std::shared_ptr<BMPManager>& bmpManager)
 {
-	glm::mat4x4 model = glm::mat4x4(1);
+	glm::mat4x4 model = glm::mat4x4(0.05);
 	model = glm::translate(model, glm::vec3(0));
 
 	//model = glm::rotate(model,glm::radians(45.0f), glm::vec3(0, 1, 0));
@@ -222,8 +230,8 @@ void RenderSphere(Render& render,
 
 	std::vector<IMaterial*> materials;
 
-	//auto mat = new SimpleLitMaterail(Color(1.0f, 0, 0, 0.3f));
-	auto mat = new PBRMaterail();
+	auto mat = new SimpleLitMaterail(Color(1.0f, 0, 0, 0.3f));
+	//auto mat = new PBRMaterail();
 
 	mat->SetViewProjection(cam.GetView(), cam.GetProjection());
 
@@ -357,9 +365,9 @@ void Loop()
 		//RenderHero(render, camera, meshManager, bmpManager);
 
 
-		RenderSphere(render, camera, meshManager, bmpManager);
+		//RenderSphere(render, camera, meshManager, bmpManager);
 
-		//RenderBox(render, camera, meshManager, bmpManager);
+		RenderBox(render, camera, meshManager, bmpManager);
 
 		//RenderShaderBall(render, camera, meshManager, bmpManager);
 
